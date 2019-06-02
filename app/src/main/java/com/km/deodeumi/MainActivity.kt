@@ -10,8 +10,6 @@ import android.util.Log
 import java.security.MessageDigest
 
 
-
-
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         try {
             if (Build.VERSION.SDK_INT >= 28) {
                 @SuppressLint("WrongConstant") val packageInfo =
-                    packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+                    packageManager.getPackageInfo("com.km.deodeumi", PackageManager.GET_SIGNING_CERTIFICATES)
                 val signatures = packageInfo.signingInfo.apkContentsSigners
                 val md = MessageDigest.getInstance("SHA")
                 for (signature in signatures) {
@@ -35,4 +33,8 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+
 }
+
+
