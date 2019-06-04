@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -16,6 +17,7 @@ import android.widget.Toast
 import com.km.deodeumi.R
 import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.MapApiConst
+import net.daum.mf.map.api.MapCircle
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
 import net.daum.mf.map.api.MapView
@@ -30,6 +32,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     private lateinit var mapView: MapView
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
+
+
     //private var txt_location = findViewById<TextView>(R.id.txt_my_location)
 
 
@@ -105,6 +109,22 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
         reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
+
+        val circle = MapCircle(
+            MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude), // center
+            50, // radius (반경 50m)
+            Color.argb(128, 255, 203, 203), // strokeColor
+            Color.argb(128, 255, 203, 203) // fillColor
+
+        )
+        circle.tag = 1
+        mapView.addCircle(circle)
+
+//        var boundArr = Array<MapPointBounds>(1){circle.bound}
+//        var mapPointBounds = MapPointBounds(boundArr)
+//        mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, 0))
+        //mapView.setZoomLevel(3, true)
+
         Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
     }
 
