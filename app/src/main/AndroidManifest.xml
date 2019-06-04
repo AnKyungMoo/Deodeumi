@@ -13,8 +13,8 @@
             android:supportsRtl="true"
             android:theme="@style/NoTitle"
             android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".MyLocationActivity">
+        <activity android:name="activity.MainActivity"></activity>
+        <activity android:name="activity.MyLocationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

@@ -1,7 +1,8 @@
-package com.km.deodeumi
+package activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.km.deodeumi.R
 
 
 class MainActivity : AppCompatActivity() {
