@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -17,7 +16,6 @@ import android.widget.Toast
 import com.km.deodeumi.R
 import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.MapApiConst
-import net.daum.mf.map.api.MapCircle
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
 import net.daum.mf.map.api.MapView
@@ -44,6 +42,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
+
 
         txt_my_location.text = "현재 내 위치: "
 
@@ -105,26 +104,13 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     // MapView.CurrentLocationEventListener
     override fun onCurrentLocationUpdate(p0: MapView?, p1: MapPoint?, p2: Float) {
         val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
-//        mapView.mapCenterPoint
+//        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
         reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
-
-        val circle = MapCircle(
-            MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude), // center
-            50, // radius (반경 50m)
-            Color.argb(128, 255, 203, 203), // strokeColor
-            Color.argb(128, 255, 203, 203) // fillColor
-
-        )
-        circle.tag = 1
-        mapView.addCircle(circle)
-
-//        var boundArr = Array<MapPointBounds>(1){circle.bound}
-//        var mapPointBounds = MapPointBounds(boundArr)
-//        mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, 0))
-        //mapView.setZoomLevel(3, true)
-
+        mapView.setCurrentLocationRadius(50)
+        mapView.setCurrentLocationRadiusFillColor(android.graphics.Color.argb(128,255,203,203))
+        mapView.setCurrentLocationRadiusStrokeColor(android.graphics.Color.argb(128,255,203,203))
         Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
     }
 
