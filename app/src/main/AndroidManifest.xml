@@ -20,6 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name="activity.LocationSearchActivity"/>
 
         <meta-data android:name="com.kakao.sdk.AppKey"
                    android:value="7bed5c842c48889631847af23e0f447e"/>
