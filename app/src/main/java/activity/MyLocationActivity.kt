@@ -44,6 +44,15 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
 
+        //path 들이 여러개 들어오면, 그만큼 객체를 생성해야함
+        val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
+        var inflater = LayoutInflater.from(this)
+        val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
+
+        inflaterView.addView(s)
+
+
+
 
         txt_my_location.text = "현재 내 위치: "
 
@@ -100,6 +109,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             }
 
         }
+
     }
 
     // MapView.CurrentLocationEventListener
@@ -124,7 +134,6 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     }
 
     override fun onCurrentLocationDeviceHeadingUpdate(p0: MapView?, p1: Float) {
-
     }
 
 
@@ -163,6 +172,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         }
         builder.setNegativeButton("취소") { dialog, id -> dialog.cancel() }
         builder.create().show()
+
     }
 
     //위치 퍼미션을 갖고 있는지 체크
