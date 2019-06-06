@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import android.widget.Toast
 import com.km.deodeumi.R
@@ -31,6 +32,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var mapView: MapView
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
 
+    //맵 위에 뜨는 화면(사용자 이동 경로)
+
+
+
+
 
     //private var txt_location = findViewById<TextView>(R.id.txt_my_location)
 
@@ -39,9 +45,20 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_location)
         val mapViewContainer = findViewById<RelativeLayout>(R.id.mapView)
+
+        //path 들이 여러개 들어오면, 그만큼 객체를 생성해야함
+        val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
+        var inflater = LayoutInflater.from(this)
+        val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
+
+        inflaterView.addView(s)
+
+
+
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
+
 
 
         txt_my_location.text = "현재 내 위치: "
