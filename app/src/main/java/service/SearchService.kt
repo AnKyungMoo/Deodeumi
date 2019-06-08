@@ -1,0 +1,28 @@
+package service
+
+import `interface`.SearchInterface
+import io.reactivex.schedulers.Schedulers
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+
+object SearchService {
+    fun restAPI (): SearchInterface {
+        return retrofitInterface().create(SearchInterface::class.java)
+    }
+
+    private val httpClient = OkHttpClient.Builder()
+        .addNetworkInterceptor { chain: Interceptor.Chain -> chain.proceed(chain.request().newBuilder().build()) }!!
+
+    private fun retrofitInterface(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://dapi.kakao.com/")
+            .addConverterFactory(MoshiConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+            .client(httpClient.build())
+            .build()
+    }
+}
