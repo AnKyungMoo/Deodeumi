@@ -1,5 +1,6 @@
 package activity
 
+import adapter.FootfallPathsAdapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -31,6 +32,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     private lateinit var mapView: MapView
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
+    lateinit var adapter: FootfallPathsAdapter
+
 
 
     //private var txt_location = findViewById<TextView>(R.id.txt_my_location)
@@ -44,7 +47,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
 
-        //path 들이 여러개 들어오면, 그만큼 객체를 생성해야함
+        //adapter = FootfallPathsAdapter(this, List<FootfallPaths>)
+
+
         val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
         var inflater = LayoutInflater.from(this)
         val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
