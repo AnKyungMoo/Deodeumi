@@ -1,4 +1,4 @@
-package Model
+package models
 
 object KeywordObject {
     data class meta (

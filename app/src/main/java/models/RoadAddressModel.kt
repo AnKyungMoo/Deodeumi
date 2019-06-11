@@ -1,4 +1,4 @@
-package Model
+package models
 
 data class RoadAddressModel (
     val address_name: String,

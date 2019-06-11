@@ -1,4 +1,4 @@
-package Model
+package models
 
 class AddressObject {
     data class meta (
