@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.km.deodeumi.R
 import kotlinx.android.synthetic.main.item_search.view.*
 import models.KeywordObject
@@ -34,6 +35,11 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.bind(documentList[position], context)
+
+        // item click 할 때 발생하는 이벤트
+        holder.itemView.setOnClickListener {
+            Toast.makeText(context, documentList[position].place_name, Toast.LENGTH_LONG).show()
+        }
     }
 
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
