@@ -1,6 +1,5 @@
 package activity
 
-import Model.AddressObject
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -26,7 +25,7 @@ class LocationSearchActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { result ->
-                    Log.d("resultKM", result.documents.address_name)
+                    Log.d("resultKM", result.documents[0].toString())
                 },
                 { err ->
                     Log.e("Error User",err.toString())

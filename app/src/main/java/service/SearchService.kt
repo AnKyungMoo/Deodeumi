@@ -7,7 +7,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 object SearchService {
     fun restAPI (): SearchInterface {
@@ -20,7 +19,7 @@ object SearchService {
     private fun retrofitInterface(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://dapi.kakao.com/")
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
             .client(httpClient.build())
             .build()

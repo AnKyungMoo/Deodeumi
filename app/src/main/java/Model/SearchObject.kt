@@ -3,7 +3,7 @@ package Model
 object SearchObject {
     data class Address (
         val meta: AddressObject.meta,
-        val documents: AddressObject.documents
+        val documents: ArrayList<AddressObject.documents>
     )
 
     data class Keyword (
