@@ -17,15 +17,30 @@ class LocationSearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_location_search)
 
         getAddressSearch()
+        getKeywordSearch()
     }
 
     private fun getAddressSearch() {
-        subscription = SearchService.restAPI().addressSearch("기흥")
+        subscription = SearchService.restAPI().addressSearch("강남")
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { result ->
-                    Log.d("resultKM", result.documents[0].toString())
+                    Log.d("addressResultKM", result.documents[0].toString())
+                },
+                { err ->
+                    Log.e("Error User",err.toString())
+                }
+            )
+    }
+
+    private fun getKeywordSearch() {
+        subscription = SearchService.restAPI().keywordSearch("강남역")
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { result ->
+                    Log.d("keywordResultKM", result.documents[0].place_name)
                 },
                 { err ->
                     Log.e("Error User",err.toString())

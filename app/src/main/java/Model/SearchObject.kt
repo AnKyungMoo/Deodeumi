@@ -7,7 +7,7 @@ object SearchObject {
     )
 
     data class Keyword (
-        val first: String,
-        val second: String
+        val meta: KeywordObject.meta,
+        val documents: ArrayList<KeywordObject.documents>
     )
 }
