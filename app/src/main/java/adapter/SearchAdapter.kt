@@ -23,6 +23,11 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
         notifyDataSetChanged()
     }
 
+    fun removeAllItem() {
+        documentList.clear()
+        notifyDataSetChanged()
+    }
+
     override fun getItemCount(): Int {
         return documentList.size
     }
