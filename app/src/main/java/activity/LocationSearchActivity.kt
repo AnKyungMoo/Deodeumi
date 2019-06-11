@@ -27,12 +27,12 @@ class LocationSearchActivity : AppCompatActivity() {
         search_recycler_view.layoutManager = layoutManager
         search_recycler_view.setHasFixedSize(true)
 
-        getAddressSearch()
-        getKeywordSearch()
+        getAddressSearch("강남")
+        getKeywordSearch("강남역")
     }
 
-    private fun getAddressSearch() {
-        subscription = SearchService.restAPI().addressSearch("강남")
+    private fun getAddressSearch(keyword: String) {
+        subscription = SearchService.restAPI().addressSearch(keyword)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -45,8 +45,8 @@ class LocationSearchActivity : AppCompatActivity() {
             )
     }
 
-    private fun getKeywordSearch() {
-        subscription = SearchService.restAPI().keywordSearch("강남역")
+    private fun getKeywordSearch(keyword: String) {
+        subscription = SearchService.restAPI().keywordSearch(keyword)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
