@@ -14,6 +14,7 @@
             android:layout_marginTop="23dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/layout_shape">
 
         <TextView
@@ -48,8 +49,25 @@
             android:layout_below="@+id/layout_search"
             android:layout_above="@+id/layout_menu_bar"
             android:layout_height="match_parent">
-
+    
+        <!--<ListView-->
+            <!--android:id="@+id/list_view_location"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:layout_height="wrap_content">-->
+    <!---->
+        <!--</ListView>-->
+        
     </RelativeLayout>
+    <!--<ListView-->
+            <!--android:id="@+id/list_view_location"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_below="@+id/layout_search"-->
+            <!--android:layout_above="@+id/layout_menu_bar"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:layout_height="wrap_content">-->
+
+    <!--</ListView>-->
 
     <RelativeLayout
             android:id="@+id/layout_menu_bar"

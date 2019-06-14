@@ -1,6 +1,5 @@
 package activity
 
-import adapter.FootfallPathsAdapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -17,6 +16,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import com.km.deodeumi.R
 import kotlinx.android.synthetic.main.activity_my_location.*
+import mapapi.FootfallPaths
 import mapapi.MapApiConst
 import net.daum.mf.map.api.MapPoint
 import net.daum.mf.map.api.MapReverseGeoCoder
@@ -32,22 +32,24 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     private lateinit var mapView: MapView
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
-    lateinit var adapter: FootfallPathsAdapter
+    private var pathList = arrayListOf<FootfallPaths>(
+        FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음"),
+        FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음")
+    ) //경로 리스트
 
-
-
-    //private var txt_location = findViewById<TextView>(R.id.txt_my_location)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_location)
         val mapViewContainer = findViewById<RelativeLayout>(R.id.mapView)
+//        val pathListView = findViewById<ListView>(R.id.list_view_location)
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
 
-        //adapter = FootfallPathsAdapter(this, List<FootfallPaths>)
+//        val dogAdapter = PathAdapter(this, pathList)
+//        pathListView.adapter = dogAdapter
 
 
         val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
