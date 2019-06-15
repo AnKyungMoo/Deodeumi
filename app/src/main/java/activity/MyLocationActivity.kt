@@ -69,6 +69,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             checkRunTimePermission()
         }
 
+
+        layout_search.setOnClickListener {
+            val i = Intent(this, LocationSearchActivity::class.java)
+            startActivity(i)
+        }
     }
 
     @Override
