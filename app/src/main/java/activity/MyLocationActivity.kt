@@ -1,6 +1,5 @@
 package activity
 
-import `interface`.DistanceInterface
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -22,15 +21,8 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.FootfallPaths
 import mapapi.MapApiConst
-import models.DistanceObject
 import net.daum.mf.map.api.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import net.daum.mf.map.n.api.internal.NativeMapLocationManager.setCurrentLocationTrackingMode
-
 import service.LocationService
 
 
@@ -48,10 +40,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var mapPointGeo : MapPoint.GeoCoordinate
     private lateinit var polyline : MapPolyline
     private var subscription: Disposable? = null //retrofit
+    private val res = arrayOfNulls<String>(4)
 
-    private val res = arrayOf("","")
-    private lateinit var res1 :  Array<String>
-    private lateinit var res2 :  Array<String>
 
     private var pathList = arrayListOf<FootfallPaths>(
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음"),
@@ -69,6 +59,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
         mapView.setMapViewEventListener(this)
+
 
 //        val dogAdapter = PathAdapter(this, pathList)
 //        pathListView.adapter = dogAdapter
@@ -110,6 +101,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             startActivity(i)
             finish()
         }
+
+
     }
 
     @Override
@@ -164,10 +157,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     override fun onCurrentLocationUpdate(p0: MapView?, p1: MapPoint?, p2: Float) {
 //        val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
         mapPointGeo = p1!!.mapPointGeoCoord
+
 //        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
-        Log.i("latitude1111: ",mapPointGeo.latitude.toString())
-        Log.i("longitude1111: ",mapPointGeo.longitude.toString())
         reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
         mapView.setCurrentLocationRadius(50)
@@ -257,68 +249,46 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     // WGS84 -> WTM
     private fun locationConverter(x: String,y: String,input_coord: String,output_coord: String) {
 
-       // val res = arrayOf("","")
-
         subscription = LocationService.distanceRestAPI().distanceConverter(x,y,input_coord,output_coord)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { result ->
-//                    Log.d("WTM_X", result.documents[0].x)
-//                    Log.d("WTM_Y", result.documents[0].y)
-                    res[0] = result.documents[0].x
-                    res[1] = result.documents[0].y
-                    Log.d("res[0], res[1]", res[0]+","+res[1])
+
+                    if(this.res[0] == null){
+                        res[0] = result.documents[0].x
+                        res[1] = result.documents[0].y
+                    }else if(this.res[2] == null){
+                        res[2] = result.documents[0].x
+                        res[3] = result.documents[0].y
+                        calculatorDistance(res[0].toString(),res[1].toString(),res[2].toString(),res[3].toString())
+                        for (item in res.indices){
+                            res[item] = null
+                        }
+
+                    }
+
                 },
                 { err ->
                     Log.e("Error User",err.toString())
                 }
             )
 
-
-        //return res
     }
 
     // calculator distance
     private fun calculatorDistance(x1: String, y1:String, x2:String, y2:String): Double {
 
-        var x_distance = Math.pow(Math.abs(x1.toInt() - x2.toInt()).toDouble(), 2.0) //Math.abs(x1.toInt() - x2.toInt())
-        var y_distance = Math.pow(Math.abs(y1.toInt() - y2.toInt()).toDouble(), 2.0) //Math.abs(y1.toInt() - y2.toInt())
+        //var x_distance = Math.pow(Math.abs(x1.toInt() - x2.toInt()).toDouble(), 2.0) //Math.abs(x1.toInt() - x2.toInt())
+        var x_distance = Math.pow(Math.abs(x1.toDouble() - x2.toDouble()), 2.0)
+        var y_distance = Math.pow(Math.abs(y1.toDouble() - y2.toDouble()), 2.0) //Math.abs(y1.toInt() - y2.toInt())
+        Toast.makeText(this, "거리(m)->"+Math.sqrt(x_distance+y_distance), Toast.LENGTH_SHORT).show()
 
         return Math.sqrt(x_distance+y_distance)
     }
 
-    private fun stringToInteger(res0: String, res1: String){
-
-    }
-
-    private fun calculatorDistance2(x: String, y: String, input_coord: String, output_coord: String){
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://dapi.kakao.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        val service = retrofit.create(DistanceInterface::class.java)
-        val call = service.testDistance(x,y,input_coord,output_coord)
-        //val call = service.distanceRestAPI().testDistance(x,y,input_coord,output_coord)
-        call.enqueue(object : Callback<DistanceObject.Distance> {
-            override fun onResponse(call: Call<DistanceObject.Distance>, response: Response<DistanceObject.Distance>) {
-                if (response.code() == 200) {
-                    val response = response.body()!!
-                    res[0] = response.documents[0].x
-                    res[1] = response.documents[0].y
-                    Log.i("distance222",res[0]+","+res[1])
-                }
-            }
-
-            override fun onFailure(call: Call<DistanceObject.Distance>, t: Throwable) {
-
-            }
-        })
 
 
-
-    }
 
     // MapView.MapViewEventListener
     override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
@@ -348,13 +318,13 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     //37.377803802490234, 126.93367767333984
     override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {
 
+        locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
+
         mapView.removeAllPolylines()
         polyline = MapPolyline()
 
-
         val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
-//        Log.i("latitude2222: ",mapPointGeo.latitude.toString())
-//        Log.i("longitude2222: ",mapPointGeo.longitude.toString())
+
 
         polyline.tag = 1000
         polyline.lineColor = android.graphics.Color.argb(128,255,51,0)
@@ -364,15 +334,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
 
         mapView.addPolyline(polyline)
-
-        calculatorDistance2(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
-//        locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
-//        locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
-
-
-//        Log.i("test22 ", res2[0]+","+res2[1])
-//        var distance = calculatorDistance(res1[0], res1[1], res2[0], res2[1])
-//        Log.i("거리계산 결과: ", distance.toString())
+        locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
 
 
         val mapPointBounds = MapPointBounds(polyline.mapPoints)
