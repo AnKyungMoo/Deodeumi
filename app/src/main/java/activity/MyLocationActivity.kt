@@ -29,6 +29,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import net.daum.mf.map.n.api.internal.NativeMapLocationManager.setCurrentLocationTrackingMode
+
 import service.LocationService
 
 
@@ -95,6 +97,12 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             checkRunTimePermission()
         }
 
+        /*
+        * 나침반 모드 설정
+        * MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
+        * -> 이게 3번인거 같은데 왜 되는지 잘..
+        * */
+        setCurrentLocationTrackingMode(3)
 
         // 위치 검색으로 이동
         layout_search.setOnClickListener {
