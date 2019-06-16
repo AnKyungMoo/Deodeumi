@@ -40,6 +40,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var polyline : MapPolyline
     private var subscription: Disposable? = null //retrofit
 
+    private lateinit var res1 :  Array<String>
+    private lateinit var res2 :  Array<String>
+
     private var pathList = arrayListOf<FootfallPaths>(
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음"),
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음")
@@ -147,8 +150,6 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapPointGeo = p1!!.mapPointGeoCoord
 //        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
-        // 37.37471389770508, 126.93061828613281
-        // 37.377803802490234, 126.93367767333984
         Log.i("latitude1111: ",mapPointGeo.latitude.toString())
         Log.i("longitude1111: ",mapPointGeo.longitude.toString())
         reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
@@ -156,7 +157,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapView.setCurrentLocationRadius(50)
         mapView.setCurrentLocationRadiusFillColor(android.graphics.Color.argb(128,255,203,203))
         mapView.setCurrentLocationRadiusStrokeColor(android.graphics.Color.argb(128,255,203,203))
-        Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
+        //Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
     }
 
     override fun onCurrentLocationUpdateFailed(p0: MapView?) {
@@ -237,24 +238,40 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         }
     }
 
-    private fun testRetrofit(x: String,y: String,a: String,b: String){
-      subscription = LocationService.distanceRestAPI().distanceConverter(x,y,a,b)
+    // WGS84 -> WTM
+    private fun locationConverter(x: String,y: String,input_coord: String,output_coord: String): Array<String?> {
+
+        val res = arrayOfNulls<String>(2)
+        var x1 = ""
+        var y1 = ""
+
+        subscription = LocationService.distanceRestAPI().distanceConverter(x,y,input_coord,output_coord)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { result ->
-                    Log.d("xxxxxxx", result.documents[0].x)
-                    Log.d("yyyyyy", result.documents[0].y)
-                    Toast.makeText(this,result.documents[0].x +", "+result.documents[0].y, Toast.LENGTH_SHORT).show()
-
-
+                    Log.d("WTM_X", result.documents[0].x)
+                    Log.d("WTM_Y", result.documents[0].y)
+                    x1 = result.documents[0].x
+                    y1 = result.documents[0].y
                 },
                 { err ->
                     Log.e("Error User",err.toString())
                 }
             )
 
+        Log.i("test1", x1+","+y1)
 
+        return res
+    }
+
+    // calculator distance
+    private fun calculatorDistance(x1: String, y1:String, x2:String, y2:String): Double {
+
+        var x_distance = Math.pow(Math.abs(x1.toInt() - x2.toInt()).toDouble(), 2.0) //Math.abs(x1.toInt() - x2.toInt())
+        var y_distance = Math.pow(Math.abs(y1.toInt() - y2.toInt()).toDouble(), 2.0) //Math.abs(y1.toInt() - y2.toInt())
+
+        return Math.sqrt(x_distance+y_distance)
     }
 
     // MapView.MapViewEventListener
@@ -290,8 +307,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
 
         val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
-        Log.i("latitude2222: ",mapPointGeo.latitude.toString())
-        Log.i("longitude2222: ",mapPointGeo.longitude.toString())
+//        Log.i("latitude2222: ",mapPointGeo.latitude.toString())
+//        Log.i("longitude2222: ",mapPointGeo.longitude.toString())
 
         polyline.tag = 1000
         polyline.lineColor = android.graphics.Color.argb(128,255,51,0)
@@ -301,7 +318,16 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
 
         mapView.addPolyline(polyline)
-        testRetrofit(this.mapPointGeo.latitude.toString(),this.mapPointGeo.longitude.toString(),"WTM","WGS84")
+
+        //res1 = locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
+        locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
+        //res2 = locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
+
+//        Log.i("test11 ", res1[0]+","+res1[1])
+//        Log.i("test22 ", res2[0]+","+res2[1])
+//        var distance = calculatorDistance(res1[0], res1[1], res2[0], res2[1])
+//        Log.i("거리계산 결과: ", distance.toString())
+
 
         val mapPointBounds = MapPointBounds(polyline.mapPoints)
         val padding = 100 // px
