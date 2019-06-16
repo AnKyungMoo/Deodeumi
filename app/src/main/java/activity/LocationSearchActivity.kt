@@ -3,6 +3,7 @@ package activity
 import adapter.SearchAdapter
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,6 +14,9 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_location_search.*
 import service.SearchService
+
+
+
 
 class LocationSearchActivity : AppCompatActivity() {
     private lateinit var subscription: Disposable
@@ -28,6 +32,9 @@ class LocationSearchActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         search_recycler_view.layoutManager = layoutManager
         search_recycler_view.setHasFixedSize(true)
+        var dividerItemDecoration = DividerItemDecoration(this, LinearLayoutManager.VERTICAL)
+        dividerItemDecoration.setDrawable(baseContext.getDrawable(R.drawable.recyclerview_divider))
+        search_recycler_view.addItemDecoration(dividerItemDecoration)
 
         edit_search_start.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {

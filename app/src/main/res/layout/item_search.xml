@@ -5,10 +5,15 @@
 
     <TextView
         android:id="@+id/text_search_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="강남역"
-        android:textSize="30sp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"/>
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:layout_marginLeft="20dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="18dp"
+        />
+    
+    
 </RelativeLayout>

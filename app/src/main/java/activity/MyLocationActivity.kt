@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.FootfallPaths
 import mapapi.MapApiConst
 import net.daum.mf.map.api.*
-import net.daum.mf.map.n.api.internal.NativeMapLocationManager.setCurrentLocationTrackingMode
 import service.LocationService
 
 
@@ -93,7 +92,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         * MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving
         * -> 이게 3번인거 같은데 왜 되는지 잘..
         * */
-        setCurrentLocationTrackingMode(3)
+
+        // setCurrentLocationTrackingMode(3)
 
         // 위치 검색으로 이동
         layout_search.setOnClickListener {
@@ -282,9 +282,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         //var x_distance = Math.pow(Math.abs(x1.toInt() - x2.toInt()).toDouble(), 2.0) //Math.abs(x1.toInt() - x2.toInt())
         var x_distance = Math.pow(Math.abs(x1.toDouble() - x2.toDouble()), 2.0)
         var y_distance = Math.pow(Math.abs(y1.toDouble() - y2.toDouble()), 2.0) //Math.abs(y1.toInt() - y2.toInt())
-        Toast.makeText(this, "거리(m)->"+Math.sqrt(x_distance+y_distance), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "거리(m)->"+Math.ceil(Math.sqrt(x_distance+y_distance)), Toast.LENGTH_SHORT).show()
 
-        return Math.sqrt(x_distance+y_distance)
+        return Math.ceil(Math.sqrt(x_distance+y_distance))
     }
 
 
