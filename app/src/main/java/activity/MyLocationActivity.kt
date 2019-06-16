@@ -1,5 +1,6 @@
 package activity
 
+import `interface`.DistanceInterface
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -21,7 +22,13 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.FootfallPaths
 import mapapi.MapApiConst
+import models.DistanceObject
 import net.daum.mf.map.api.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import service.LocationService
 
 
@@ -40,6 +47,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var polyline : MapPolyline
     private var subscription: Disposable? = null //retrofit
 
+    private val res = arrayOf("","")
     private lateinit var res1 :  Array<String>
     private lateinit var res2 :  Array<String>
 
@@ -239,30 +247,28 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     }
 
     // WGS84 -> WTM
-    private fun locationConverter(x: String,y: String,input_coord: String,output_coord: String): Array<String?> {
+    private fun locationConverter(x: String,y: String,input_coord: String,output_coord: String) {
 
-        val res = arrayOfNulls<String>(2)
-        var x1 = ""
-        var y1 = ""
+       // val res = arrayOf("","")
 
         subscription = LocationService.distanceRestAPI().distanceConverter(x,y,input_coord,output_coord)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { result ->
-                    Log.d("WTM_X", result.documents[0].x)
-                    Log.d("WTM_Y", result.documents[0].y)
-                    x1 = result.documents[0].x
-                    y1 = result.documents[0].y
+//                    Log.d("WTM_X", result.documents[0].x)
+//                    Log.d("WTM_Y", result.documents[0].y)
+                    res[0] = result.documents[0].x
+                    res[1] = result.documents[0].y
+                    Log.d("res[0], res[1]", res[0]+","+res[1])
                 },
                 { err ->
                     Log.e("Error User",err.toString())
                 }
             )
 
-        Log.i("test1", x1+","+y1)
 
-        return res
+        //return res
     }
 
     // calculator distance
@@ -272,6 +278,38 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         var y_distance = Math.pow(Math.abs(y1.toInt() - y2.toInt()).toDouble(), 2.0) //Math.abs(y1.toInt() - y2.toInt())
 
         return Math.sqrt(x_distance+y_distance)
+    }
+
+    private fun stringToInteger(res0: String, res1: String){
+
+    }
+
+    private fun calculatorDistance2(x: String, y: String, input_coord: String, output_coord: String){
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://dapi.kakao.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        val service = retrofit.create(DistanceInterface::class.java)
+        val call = service.testDistance(x,y,input_coord,output_coord)
+        //val call = service.distanceRestAPI().testDistance(x,y,input_coord,output_coord)
+        call.enqueue(object : Callback<DistanceObject.Distance> {
+            override fun onResponse(call: Call<DistanceObject.Distance>, response: Response<DistanceObject.Distance>) {
+                if (response.code() == 200) {
+                    val response = response.body()!!
+                    res[0] = response.documents[0].x
+                    res[1] = response.documents[0].y
+                    Log.i("distance222",res[0]+","+res[1])
+                }
+            }
+
+            override fun onFailure(call: Call<DistanceObject.Distance>, t: Throwable) {
+
+            }
+        })
+
+
+
     }
 
     // MapView.MapViewEventListener
@@ -319,11 +357,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         mapView.addPolyline(polyline)
 
-        //res1 = locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
-        locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
-        //res2 = locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
+        calculatorDistance2(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
+//        locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
+//        locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
 
-//        Log.i("test11 ", res1[0]+","+res1[1])
+
 //        Log.i("test22 ", res2[0]+","+res2[1])
 //        var distance = calculatorDistance(res1[0], res1[1], res2[0], res2[1])
 //        Log.i("거리계산 결과: ", distance.toString())
