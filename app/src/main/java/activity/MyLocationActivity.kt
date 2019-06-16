@@ -15,15 +15,19 @@ import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import android.widget.Toast
 import com.km.deodeumi.R
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
 import mapapi.FootfallPaths
 import mapapi.MapApiConst
-import net.daum.mf.map.api.MapPoint
-import net.daum.mf.map.api.MapReverseGeoCoder
-import net.daum.mf.map.api.MapView
+import net.daum.mf.map.api.*
+import service.LocationService
 
 
-class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener,MapReverseGeoCoder.ReverseGeoCodingResultListener {
+class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
+    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener {
+
 
     // var : 읽기/쓰기 가능한 일반 변수 val : 읽기만 가능한 final 변수
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
@@ -32,6 +36,10 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     private lateinit var mapView: MapView
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
+    private lateinit var mapPointGeo : MapPoint.GeoCoordinate
+    private lateinit var polyline : MapPolyline
+    private var subscription: Disposable? = null //retrofit
+
     private var pathList = arrayListOf<FootfallPaths>(
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음"),
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음")
@@ -47,6 +55,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
+        mapView.setMapViewEventListener(this)
 
 //        val dogAdapter = PathAdapter(this, pathList)
 //        pathListView.adapter = dogAdapter
@@ -134,9 +143,14 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     // MapView.CurrentLocationEventListener
     override fun onCurrentLocationUpdate(p0: MapView?, p1: MapPoint?, p2: Float) {
-        val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
+//        val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
+        mapPointGeo = p1!!.mapPointGeoCoord
 //        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
+        // 37.37471389770508, 126.93061828613281
+        // 37.377803802490234, 126.93367767333984
+        Log.i("latitude1111: ",mapPointGeo.latitude.toString())
+        Log.i("longitude1111: ",mapPointGeo.longitude.toString())
         reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
         mapView.setCurrentLocationRadius(50)
@@ -181,7 +195,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     //GPS 활성화를 위한 메소드
     private fun showDialogForLocationServiceSetting(){
-        val builder = AlertDialog.Builder(this@MyLocationActivity)
+        val builder = AlertDialog.Builder(this)
         builder.setTitle("위치 서비스 비활성화")
         builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
                 + "위치 설정을 수정하시겠습니까?")
@@ -221,6 +235,87 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             }
 
         }
+    }
+
+    private fun testRetrofit(x: String,y: String,a: String,b: String){
+      subscription = LocationService.distanceRestAPI().distanceConverter(x,y,a,b)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { result ->
+                    Log.d("xxxxxxx", result.documents[0].x)
+                    Log.d("yyyyyy", result.documents[0].y)
+                    Toast.makeText(this,result.documents[0].x +", "+result.documents[0].y, Toast.LENGTH_SHORT).show()
+
+
+                },
+                { err ->
+                    Log.e("Error User",err.toString())
+                }
+            )
+
+
+    }
+
+    // MapView.MapViewEventListener
+    override fun onMapViewDoubleTapped(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewInitialized(p0: MapView?) {
+
+    }
+
+    override fun onMapViewDragStarted(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewMoveFinished(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {
+
+    }
+
+    //37.377803802490234, 126.93367767333984
+    override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {
+
+        mapView.removeAllPolylines()
+        polyline = MapPolyline()
+
+
+        val mapPointGeo : MapPoint.GeoCoordinate = p1!!.mapPointGeoCoord
+        Log.i("latitude2222: ",mapPointGeo.latitude.toString())
+        Log.i("longitude2222: ",mapPointGeo.longitude.toString())
+
+        polyline.tag = 1000
+        polyline.lineColor = android.graphics.Color.argb(128,255,51,0)
+
+        polyline.addPoint(MapPoint.mapPointWithGeoCoord(this.mapPointGeo.latitude, this.mapPointGeo.longitude))
+        polyline.addPoint(MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude))
+
+
+        mapView.addPolyline(polyline)
+        testRetrofit(this.mapPointGeo.latitude.toString(),this.mapPointGeo.longitude.toString(),"WTM","WGS84")
+
+        val mapPointBounds = MapPointBounds(polyline.mapPoints)
+        val padding = 100 // px
+        mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding))
+
+
+    }
+
+    override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {
+
+    }
+
+    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {
+
     }
 
 }
