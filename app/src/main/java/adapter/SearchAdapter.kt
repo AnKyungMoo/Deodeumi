@@ -1,6 +1,9 @@
 package adapter
 
+import activity.MyLocationActivity
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +41,11 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
 
         // item click 할 때 발생하는 이벤트
         holder.itemView.setOnClickListener {
-            Toast.makeText(context, documentList[position].place_name, Toast.LENGTH_LONG).show()
+            val intent = Intent(context, MyLocationActivity::class.java)
+            intent.putExtra("myLocationString", documentList[position].place_name)
+            context.startActivity(intent)
+
+            (context as Activity).finish()
         }
     }
 

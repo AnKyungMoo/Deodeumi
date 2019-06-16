@@ -37,7 +37,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음")
     ) //경로 리스트
 
-
+    private var myLocationString: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,9 +59,15 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         inflaterView.addView(s)
 
 
+        // 현재 위치 초기화
+        myLocationString = intent.getStringExtra("myLocationString")
 
+        if (myLocationString == null || myLocationString.equals("")) {
+            txt_my_location.text = "현재 내 위치: "
+        } else {
+            txt_my_location.text = "현재 내 위치: ".plus(myLocationString)
+        }
 
-        txt_my_location.text = "현재 내 위치: "
 
         if(!checkLocationServiceStatus()){
             showDialogForLocationServiceSetting()
@@ -70,9 +76,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         }
 
 
+        // 위치 검색으로 이동
         layout_search.setOnClickListener {
             val i = Intent(this, LocationSearchActivity::class.java)
             startActivity(i)
+            finish()
         }
     }
 
