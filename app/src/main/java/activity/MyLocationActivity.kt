@@ -360,7 +360,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         Toast.makeText(this, "거리(m)->"+Math.ceil(Math.sqrt(x_distance+y_distance)), Toast.LENGTH_SHORT).show()
         var meter_value = Math.ceil(Math.sqrt(x_distance+y_distance)) * 100 //m -> cm
         var footfall = (meter_value/ AVERAGE_FOOTFALL).roundToInt()
-        footCount.findViewById<TextView>(R.id.txt_footfall_count).text = footfall.toString()+" 걸음 후 도착"
+        footCount.findViewById<TextView>(R.id.txt_footfall_count).text = footfall.toString() + "걸음 후 도착합니다."
 
         return Math.ceil(Math.sqrt(x_distance+y_distance))
     }
@@ -430,20 +430,32 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             trueBearing = radianBearing * (180 / 3.141592)
         }
 
-        /**************** 얘가 각도 ******************/
-        Log.d("radianKM", "".plus(trueBearing))
-        Log.d("deviceRadian", "".plus(mapView.mapRotationAngle))
-
-        /* TODO: 각도 계산해서 넘겨주자 */
+        // 각도 계산
         val angle = trueBearing.toInt() - mapView.mapRotationAngle.toInt()
 
-        val result = if (angle >= 0) {
-            angle / 30
+        var result: String
+        if (angle >= 0) {
+            result = (angle / 30).toString() + "시"
+
+            if ((angle % 30) >= 12) {
+                result += " 반 "
+            }
         } else {
-            12 - (Math.abs(angle) / 30)
+            result = (12 - (Math.abs(angle) / 30)).toString() + "시"
+
+            if ((angle % 30) >= 12) {
+                result += " 반 "
+            }
         }
 
-        return result.toString()+ "시 방향으로 회전하세요 "
+        /* TODO: 0시 일때는 회전하라는 메시지가 안넘어가게 하자
+         * TODO: 0시 반일 때는 넘어가야 됨
+         * */
+        return if (result[0] != '0') {
+            result + "방향으로 회전하고 "
+        } else {
+            "전방으로 "
+        }
     }
 }
 
