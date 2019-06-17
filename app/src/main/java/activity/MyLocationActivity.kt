@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -24,11 +26,12 @@ import kotlinx.android.synthetic.main.activity_my_location.*
 import net.daum.mf.map.api.*
 import resources.RestAPIKey
 import service.LocationService
+import java.util.*
 import kotlin.math.roundToInt
 
 
 class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
-    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener{
+    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener, TextToSpeech.OnInitListener{
 
     // var : 읽기/쓰기 가능한 일반 변수 val : 읽기만 가능한 final 변수
     private val AVERAGE_FOOTFALL : Int = 75 //성인 평균 보폭
@@ -42,6 +45,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var polyline : MapPolyline
     private var marker: MapPOIItem = MapPOIItem()
     private lateinit var footCount: View
+    private lateinit var btnPlay: Button
+    private lateinit var tts: TextToSpeech
 
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
@@ -55,6 +60,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         setContentView(R.layout.activity_my_location)
         val mapViewContainer = findViewById<RelativeLayout>(R.id.mapView)
 
+        var tts_status: Boolean = false
+        tts = TextToSpeech(this, this)
+
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
@@ -65,6 +73,23 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         var inflater = LayoutInflater.from(this)
         footCount = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
         inflaterView.addView(footCount)
+
+        btnPlay = findViewById(R.id.btn_play)
+
+        btnPlay.setOnClickListener {
+            var text = footCount.findViewById<TextView>(R.id.txt_footfall_count).text
+            if(text != null){
+                tts_status = !tts_status
+                if(tts_status){ //재생 버튼 눌렸을 때 (true)
+                    btnPlay.setBackgroundResource(R.drawable.btn_stop)
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+                }else{
+                    btnPlay.setBackgroundResource(R.drawable.btn_play)
+                    tts.stop()
+                }
+            }
+        }
+
 
 
         // 현재 위치 초기화 --> LocationSearchActivity에서 오는 data
@@ -108,11 +133,35 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     }
 
+    // Text To Speech
+    override fun onInit(status: Int) {
+
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts!!.setLanguage(Locale.KOREA)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS","The Language specified is not supported!")
+            } else {
+                btnPlay.isEnabled = true
+                tts.setPitch(0.7f)
+                tts.setSpeechRate(1.2f)
+            }
+
+        } else {
+            Log.e("TTS", "Initilization Failed!")
+        }
+    }
+
     @Override
     override fun onDestroy() {
-        super.onDestroy()
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
         mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
         mapView.setShowCurrentLocationMarker(false)
+        super.onDestroy()
     }
 
     @Override
@@ -307,7 +356,6 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     override fun onMapViewCenterPointMoved(p0: MapView?, p1: MapPoint?) {}
     override fun onMapViewDragEnded(p0: MapView?, p1: MapPoint?) {}
 
-    //37.377803802490234, 126.93367767333984
     override fun onMapViewSingleTapped(p0: MapView?, p1: MapPoint?) {
 
         locationConverter(this.mapPointGeo.longitude.toString(),this.mapPointGeo.latitude.toString(),"WGS84","WTM")
