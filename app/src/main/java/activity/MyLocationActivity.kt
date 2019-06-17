@@ -324,6 +324,30 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         polyline.addPoint(MapPoint.mapPointWithGeoCoord(this.mapPointGeo.latitude, this.mapPointGeo.longitude))
         polyline.addPoint(MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude))
 
+        /* 각도 계산하는 부분 */
+        val beginLatitudeRadian: Double = this.mapPointGeo.latitude * (3.141592 / 180)
+        val beginLongitudeRadian: Double = this.mapPointGeo.longitude * (3.141592 / 180)
+        val destinationLatitudeRadian: Double = mapPointGeo.latitude * (3.141592 / 180)
+        val destinationLongitudeRadian: Double = mapPointGeo.longitude * (3.141592 / 180)
+
+        val radianDistance: Double = Math.acos(Math.sin(beginLatitudeRadian) * Math.sin(destinationLatitudeRadian) + Math.cos(beginLatitudeRadian) * Math.cos(destinationLatitudeRadian) * Math.cos(beginLongitudeRadian - destinationLongitudeRadian))
+
+        val radianBearing: Double = Math.acos((Math.sin(destinationLatitudeRadian) - Math.sin(beginLatitudeRadian) * Math.cos(radianDistance)) / (Math.cos(beginLatitudeRadian) * Math.sin(radianDistance)))
+
+        var trueBearing: Double = 0.0
+        if (Math.sin(destinationLongitudeRadian - beginLongitudeRadian) < 0)
+        {
+            trueBearing = radianBearing * (180 / 3.141592)
+            trueBearing = 360 - trueBearing
+        }
+        else
+        {
+            trueBearing = radianBearing * (180 / 3.141592)
+        }
+
+        /**************** 얘가 각도 ******************/
+        Log.d("radianKM", "".plus(trueBearing))
+        Log.d("deviceRadian", "".plus(mapView.mapRotationAngle))
 
         mapView.addPolyline(polyline)
         locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
