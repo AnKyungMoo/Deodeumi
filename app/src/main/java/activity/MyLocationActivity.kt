@@ -36,7 +36,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
     private lateinit var mapPointGeo : MapPoint.GeoCoordinate
     private lateinit var polyline : MapPolyline
-    private lateinit var marker: MapPOIItem
+    private var marker: MapPOIItem = MapPOIItem()
 
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
@@ -76,12 +76,16 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
             mapPointGeo = MapPoint.GeoCoordinate(y_latitude.toDouble(), x_longitude.toDouble())
             mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(y_latitude.toDouble(),x_longitude.toDouble()),true)
-            marker = MapPOIItem()
             marker.itemName = myLocationString
-            marker.mapPoint = mapView.mapCenterPoint
-            marker.markerType = MapPOIItem.MarkerType.BluePin
+            marker.tag = 1
+            marker.mapPoint = MapPoint.mapPointWithGeoCoord(y_latitude.toDouble(), x_longitude.toDouble())
+            marker.markerType = MapPOIItem.MarkerType.CustomImage
+            marker.customImageResourceId = R.drawable.btn_arrow
+            marker.setCustomImageAnchor(0.5f,0.5f)
             mapView.addPOIItem(marker)
         }
+
+
 
 
         if(!checkLocationServiceStatus()){
