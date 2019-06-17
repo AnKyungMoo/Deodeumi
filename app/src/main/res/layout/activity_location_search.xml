@@ -38,10 +38,11 @@
 		
 		<Button
 				android:id="@+id/btn_close"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="닫기"
+				android:layout_width="25dp"
+				android:layout_height="25dp"
 				android:layout_centerVertical="true"
+				android:background="@drawable/btn_close"
+				android:layout_marginEnd="10dp"
 				android:layout_alignParentRight="true"/>
 	
 	

@@ -13,14 +13,14 @@
             android:supportsRtl="true"
             android:theme="@style/NoTitle"
             android:usesCleartextTraffic="true">
-        <activity android:name="activity.MainActivity"></activity>
-        <activity android:name="activity.LocationSearchActivity">
+        <activity android:name="activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="activity.MyLocationActivity"/>
+        <activity android:name="activity.MyLocationActivity"></activity>
+        <activity android:name="activity.LocationSearchActivity"/>
         <!--<activity android:name="activity.MyLocationActivity"/>-->
 
         <meta-data android:name="com.kakao.sdk.AppKey"
