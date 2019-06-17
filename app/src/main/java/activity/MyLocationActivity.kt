@@ -23,6 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
+import kotlinx.android.synthetic.main.layout_path_template.*
 import net.daum.mf.map.api.*
 import resources.RestAPIKey
 import service.LocationService
@@ -55,6 +56,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var x_longitude: String//위도 ?
     private lateinit var y_latitude: String //경도 ?
 
+    private var destinationLongitude: Double? = null
+    private var destinationLatitude: Double? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_location)
@@ -77,8 +81,24 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         btnPlay = findViewById(R.id.btn_play)
 
         btnPlay.setOnClickListener {
+            /* 잠깐 주석처리할게 미안ㅎ..
             var text = footCount.findViewById<TextView>(R.id.txt_footfall_count).text
             if(text != null){
+                tts_status = !tts_status
+                if(tts_status){ //재생 버튼 눌렸을 때 (true)
+                    btnPlay.setBackgroundResource(R.drawable.btn_stop)
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+                }else{
+                    btnPlay.setBackgroundResource(R.drawable.btn_play)
+                    tts.stop()
+                }
+            }
+            */
+
+            if (destinationLatitude != null && destinationLongitude != null) {
+                val text: String = calculateAngle() + " " + txt_footfall_count.text.toString()
+                Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+
                 tts_status = !tts_status
                 if(tts_status){ //재생 버튼 눌렸을 때 (true)
                     btnPlay.setBackgroundResource(R.drawable.btn_stop)
@@ -372,11 +392,28 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         polyline.addPoint(MapPoint.mapPointWithGeoCoord(this.mapPointGeo.latitude, this.mapPointGeo.longitude))
         polyline.addPoint(MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude))
 
+        mapView.addPolyline(polyline)
+        locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
+
+        destinationLatitude = mapPointGeo.latitude
+        destinationLongitude = mapPointGeo.longitude
+
+        val mapPointBounds = MapPointBounds(polyline.mapPoints)
+        val padding = 100 // px
+        mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding))
+
+
+    }
+
+    override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {}
+    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {}
+
+    private fun calculateAngle(): String {
         /* 각도 계산하는 부분 */
         val beginLatitudeRadian: Double = this.mapPointGeo.latitude * (3.141592 / 180)
         val beginLongitudeRadian: Double = this.mapPointGeo.longitude * (3.141592 / 180)
-        val destinationLatitudeRadian: Double = mapPointGeo.latitude * (3.141592 / 180)
-        val destinationLongitudeRadian: Double = mapPointGeo.longitude * (3.141592 / 180)
+        val destinationLatitudeRadian: Double = destinationLatitude!! * (3.141592 / 180)
+        val destinationLongitudeRadian: Double = destinationLongitude!! * (3.141592 / 180)
 
         val radianDistance: Double = Math.acos(Math.sin(beginLatitudeRadian) * Math.sin(destinationLatitudeRadian) + Math.cos(beginLatitudeRadian) * Math.cos(destinationLatitudeRadian) * Math.cos(beginLongitudeRadian - destinationLongitudeRadian))
 
@@ -397,20 +434,17 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         Log.d("radianKM", "".plus(trueBearing))
         Log.d("deviceRadian", "".plus(mapView.mapRotationAngle))
 
-        mapView.addPolyline(polyline)
-        locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
+        /* TODO: 각도 계산해서 넘겨주자 */
+        val angle = trueBearing.toInt() - mapView.mapRotationAngle.toInt()
 
+        val result = if (angle >= 0) {
+            angle / 30
+        } else {
+            12 - (Math.abs(angle) / 30)
+        }
 
-        val mapPointBounds = MapPointBounds(polyline.mapPoints)
-        val padding = 100 // px
-        mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding))
-
-
+        return result.toString()+ "시 방향으로 회전하세요 "
     }
-
-    override fun onMapViewZoomLevelChanged(p0: MapView?, p1: Int) {}
-    override fun onMapViewLongPressed(p0: MapView?, p1: MapPoint?) {}
-
 }
 
 
