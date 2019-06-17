@@ -4,17 +4,21 @@ import activity.MyLocationActivity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.support.v7.widget.RecyclerView
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.km.deodeumi.R
 import kotlinx.android.synthetic.main.item_search.view.*
 import models.KeywordObject
 
 class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.Holder>() {
     private var documentList: ArrayList<KeywordObject.documents> = ArrayList()
+    private var keyword: String = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_search, parent, false)
@@ -22,7 +26,7 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
         return Holder(view)
     }
 
-    fun addItem(document: KeywordObject.documents) {
+    fun addItem(document: KeywordObject.documents) { //place_name, address_name
         documentList.add(document)
         notifyDataSetChanged()
     }
@@ -30,6 +34,10 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
     fun removeAllItem() {
         documentList.clear()
         notifyDataSetChanged()
+    }
+
+    fun setSearchKeyword(keyword: String){
+        this.keyword = keyword
     }
 
     override fun getItemCount(): Int {
@@ -51,7 +59,17 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
 
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind (document: KeywordObject.documents, context: Context) {
-            itemView.text_search_name.text = document.place_name
+            var index = document.place_name.indexOf(keyword)
+            var span = SpannableString(document.place_name)
+            if(index >= 0){
+                var foregroundColorSpan = ForegroundColorSpan(Color.parseColor("#0b78ad"))
+                span.setSpan(foregroundColorSpan, index, index+keyword.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            itemView.text_search_name.text = span
+            itemView.text_search_address.text = document.address_name
+
+
+
         }
     }
 }

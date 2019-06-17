@@ -74,7 +74,7 @@ class LocationSearchActivity : AppCompatActivity() {
                     Log.d("keywordResultKM", result.documents[0].place_name)
 
                     searchAdapter.removeAllItem()
-
+                    searchAdapter.setSearchKeyword(keyword)
                     result.documents.forEach{
                         searchAdapter.addItem(it)
                     }
