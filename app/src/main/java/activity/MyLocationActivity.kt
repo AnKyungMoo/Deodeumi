@@ -63,10 +63,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
         var inflater = LayoutInflater.from(this)
-        //val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
         footCount = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
-        //s.findViewById<TextView>(R.id.txt_footfall_count).text = "" //걸음 수
-
         inflaterView.addView(footCount)
 
 
