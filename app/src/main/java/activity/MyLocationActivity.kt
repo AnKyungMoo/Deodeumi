@@ -12,7 +12,9 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,12 +24,14 @@ import kotlinx.android.synthetic.main.activity_my_location.*
 import net.daum.mf.map.api.*
 import resources.RestAPIKey
 import service.LocationService
+import kotlin.math.roundToInt
 
 
 class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
     ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener{
 
     // var : 읽기/쓰기 가능한 일반 변수 val : 읽기만 가능한 final 변수
+    private val AVERAGE_FOOTFALL : Int = 75 //성인 평균 보폭
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
     private val PERMISSIONS_REQUEST_CODE: Int = 100
     private var REQUIRED_PERMISSIONS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -37,7 +41,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var mapPointGeo : MapPoint.GeoCoordinate
     private lateinit var polyline : MapPolyline
     private var marker: MapPOIItem = MapPOIItem()
-    //private lateinit var marker: MapPOIItem
+    private lateinit var footCount: View
 
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
@@ -59,9 +63,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
         var inflater = LayoutInflater.from(this)
-        val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
+        //val s = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
+        footCount = inflater.inflate(R.layout.layout_path_template,inflaterView,false)
+        //s.findViewById<TextView>(R.id.txt_footfall_count).text = "" //걸음 수
 
-        inflaterView.addView(s)
+        inflaterView.addView(footCount)
 
 
         // 현재 위치 초기화 --> LocationSearchActivity에서 오는 data
@@ -166,12 +172,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         reverseGeoCoder = MapReverseGeoCoder(RestAPIKey.kakao,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
-
         mapView.setCurrentLocationRadius(50)
         mapView.setCurrentLocationRadiusFillColor(android.graphics.Color.argb(128,255,203,203))
         mapView.setCurrentLocationRadiusStrokeColor(android.graphics.Color.argb(128,255,203,203))
-
-        //Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
     }
 
     override fun onCurrentLocationUpdateFailed(p0: MapView?) {}
@@ -289,6 +292,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         var x_distance = Math.pow(Math.abs(x1.toDouble() - x2.toDouble()), 2.0)
         var y_distance = Math.pow(Math.abs(y1.toDouble() - y2.toDouble()), 2.0) //Math.abs(y1.toInt() - y2.toInt())
         Toast.makeText(this, "거리(m)->"+Math.ceil(Math.sqrt(x_distance+y_distance)), Toast.LENGTH_SHORT).show()
+        var meter_value = Math.ceil(Math.sqrt(x_distance+y_distance)) * 100 //m -> cm
+        var footfall = (meter_value/ AVERAGE_FOOTFALL).roundToInt()
+        footCount.findViewById<TextView>(R.id.txt_footfall_count).text = footfall.toString()+" 걸음 후 도착"
 
         return Math.ceil(Math.sqrt(x_distance+y_distance))
     }
