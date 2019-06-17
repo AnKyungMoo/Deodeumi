@@ -51,6 +51,8 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
         holder.itemView.setOnClickListener {
             val intent = Intent(context, MyLocationActivity::class.java)
             intent.putExtra("myLocationString", documentList[position].place_name)
+            intent.putExtra("longitude", documentList[position].x)
+            intent.putExtra("latitude",documentList[position].y)
             context.startActivity(intent)
 
             (context as Activity).finish()
@@ -67,9 +69,6 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
             }
             itemView.text_search_name.text = span
             itemView.text_search_address.text = document.address_name
-
-
-
         }
     }
 }

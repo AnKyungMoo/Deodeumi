@@ -19,10 +19,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
-import mapapi.FootfallPaths
 import mapapi.MapApiConst
 import net.daum.mf.map.api.*
 import service.LocationService
+import resources.RestAPIKey
 
 
 class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
@@ -41,27 +41,19 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
 
-
-    private var pathList = arrayListOf<FootfallPaths>(
-        FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음"),
-        FootfallPaths("ic_launcher_background","덕수궁 운현궁","10걸음")
-    ) //경로 리스트
-
-    private var myLocationString: String? = null
+    private var myLocationString: String? = null //현재 내 위치
+    private lateinit var x_longitude: String//위도 ?
+    private lateinit var y_latitude: String //경도 ?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_location)
         val mapViewContainer = findViewById<RelativeLayout>(R.id.mapView)
-//        val pathListView = findViewById<ListView>(R.id.list_view_location)
+
         mapView = MapView(this)
         mapViewContainer.addView(mapView)
         mapView.setCurrentLocationEventListener(this)
         mapView.setMapViewEventListener(this)
-
-
-//        val dogAdapter = PathAdapter(this, pathList)
-//        pathListView.adapter = dogAdapter
 
 
         val inflaterView = findViewById<RelativeLayout>(R.id.layout_path)
@@ -73,11 +65,27 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         // 현재 위치 초기화
         myLocationString = intent.getStringExtra("myLocationString")
+        x_longitude = intent.getStringExtra("longitude")
+        y_latitude = intent.getStringExtra("latitude")
 
         if (myLocationString == null || myLocationString.equals("")) {
             txt_my_location.text = "현재 내 위치: "
         } else {
             txt_my_location.text = "현재 내 위치: ".plus(myLocationString)
+
+//            mapPointGeo = MapPoint.GeoCoordinate(y_latitude.toDouble(), x_longitude.toDouble())
+//            //126.976896737645, 37.5776087830657 (경복궁)
+//            Log.i("x_longitude", x_longitude.toString())
+//            Log.i("y_latitude", y_latitude.toString())
+//
+//            Log.i("mapPoint_long", mapPointGeo.longitude.toString())
+//            Log.i("mapPoing_lati", mapPointGeo.latitude.toString())
+//
+//            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(y_latitude.toDouble(),x_longitude.toDouble()),true)
+
+//            mapPointGeo.latitude = x_longitude.toDouble()
+//            mapPointGeo.longitude = y_latitude.toDouble()
+
         }
 
 
@@ -160,11 +168,16 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
 //        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
-        reverseGeoCoder = MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY,presentPoint,this, this)
+        //126.97787475585938
+
+
+        Log.i("longgggg",mapView.mapCenterPoint.mapPointGeoCoord.longitude.toString())
+        reverseGeoCoder = MapReverseGeoCoder(RestAPIKey.kakao,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
         mapView.setCurrentLocationRadius(50)
         mapView.setCurrentLocationRadiusFillColor(android.graphics.Color.argb(128,255,203,203))
         mapView.setCurrentLocationRadiusStrokeColor(android.graphics.Color.argb(128,255,203,203))
+
         //Log.i("MyLocationActivity", String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, p2))
     }
 
