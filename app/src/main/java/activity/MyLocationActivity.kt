@@ -350,6 +350,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
         /**************** 얘가 각도 ******************/
         Log.d("radianKM", "".plus(trueBearing))
+        Log.d("deviceRadian", "".plus(mapView.mapRotationAngle))
 
         mapView.addPolyline(polyline)
         locationConverter(mapPointGeo.longitude.toString(),mapPointGeo.latitude.toString(),"WGS84","WTM")
