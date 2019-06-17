@@ -19,15 +19,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_my_location.*
-import mapapi.MapApiConst
 import net.daum.mf.map.api.*
-import service.LocationService
 import resources.RestAPIKey
+import service.LocationService
 
 
 class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
-    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener {
-
+    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener{
 
     // var : 읽기/쓰기 가능한 일반 변수 val : 읽기만 가능한 final 변수
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
@@ -38,8 +36,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var reverseGeoCoder: MapReverseGeoCoder //? = null
     private lateinit var mapPointGeo : MapPoint.GeoCoordinate
     private lateinit var polyline : MapPolyline
+    private lateinit var marker: MapPOIItem
+
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
+
 
     private var myLocationString: String? = null //현재 내 위치
     private lateinit var x_longitude: String//위도 ?
@@ -73,19 +74,13 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         } else {
             txt_my_location.text = "현재 내 위치: ".plus(myLocationString)
 
-//            mapPointGeo = MapPoint.GeoCoordinate(y_latitude.toDouble(), x_longitude.toDouble())
-//            //126.976896737645, 37.5776087830657 (경복궁)
-//            Log.i("x_longitude", x_longitude.toString())
-//            Log.i("y_latitude", y_latitude.toString())
-//
-//            Log.i("mapPoint_long", mapPointGeo.longitude.toString())
-//            Log.i("mapPoing_lati", mapPointGeo.latitude.toString())
-//
-//            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(y_latitude.toDouble(),x_longitude.toDouble()),true)
-
-//            mapPointGeo.latitude = x_longitude.toDouble()
-//            mapPointGeo.longitude = y_latitude.toDouble()
-
+            mapPointGeo = MapPoint.GeoCoordinate(y_latitude.toDouble(), x_longitude.toDouble())
+            mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(y_latitude.toDouble(),x_longitude.toDouble()),true)
+            marker = MapPOIItem()
+            marker.itemName = myLocationString
+            marker.mapPoint = mapView.mapCenterPoint
+            marker.markerType = MapPOIItem.MarkerType.BluePin
+            mapView.addPOIItem(marker)
         }
 
 
@@ -135,7 +130,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
             }
 
             if(check_result){
-                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
+                 //mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
+                mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
             }else{
                 if(ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])){
                     Toast.makeText(this, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요.", Toast.LENGTH_LONG).show()
@@ -168,10 +164,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
 //        기존 코드 : mapView.mapCenterPoint(서울시 중구로 셋팅됨)
         var presentPoint = MapPoint.mapPointWithGeoCoord(mapPointGeo.latitude, mapPointGeo.longitude)
-        //126.97787475585938
 
-
-        Log.i("longgggg",mapView.mapCenterPoint.mapPointGeoCoord.longitude.toString())
         reverseGeoCoder = MapReverseGeoCoder(RestAPIKey.kakao,presentPoint,this, this)
         reverseGeoCoder.startFindingAddress()
         mapView.setCurrentLocationRadius(50)
@@ -239,7 +232,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         // ( 안드로이드 6.0 이하 버전은 런타임 퍼미션이 필요없기 때문에 이미 허용된 걸로 인식합니다.)
         if(hasFineLocationPermission == PackageManager.PERMISSION_GRANTED){
             // 3. 위치값 가져오기
-            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
+             //mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOnWithHeading
+            mapView.currentLocationTrackingMode = MapView.CurrentLocationTrackingMode.TrackingModeOff
         }else{ // 4. 퍼미션 요청을 허용한 적이 없다면 퍼미션 요청이 필요합니다. 2가지 경우(3-1, 4-1)가 있습니다.
 
             // 3-1. 사용자가 퍼미션 거부를 한 적이 있는 경우에는
