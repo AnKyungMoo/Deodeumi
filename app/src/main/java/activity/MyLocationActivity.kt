@@ -1,8 +1,10 @@
 package activity
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
@@ -48,6 +50,8 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     private lateinit var footCount: View
     private lateinit var btnPlay: Button
     private lateinit var tts: TextToSpeech
+    private lateinit var broadCastReceiver: BroadcastReceiver
+    private lateinit var filter : IntentFilter
 
     private var subscription: Disposable? = null //retrofit
     private val res = arrayOfNulls<String>(4)
@@ -81,22 +85,11 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         btnPlay = findViewById(R.id.btn_play)
 
         btnPlay.setOnClickListener {
-            /* 잠깐 주석처리할게 미안ㅎ..
-            var text = footCount.findViewById<TextView>(R.id.txt_footfall_count).text
-            if(text != null){
-                tts_status = !tts_status
-                if(tts_status){ //재생 버튼 눌렸을 때 (true)
-                    btnPlay.setBackgroundResource(R.drawable.btn_stop)
-                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
-                }else{
-                    btnPlay.setBackgroundResource(R.drawable.btn_play)
-                    tts.stop()
-                }
-            }
-            */
 
             if (destinationLatitude != null && destinationLongitude != null) {
-                val text: String = calculateAngle() + " " + txt_footfall_count.text.toString()
+                registerReceiver(broadCastReceiver, filter)
+
+                val text: String = calculateAngle() + txt_footfall_count.text.toString()
                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 
                 tts_status = !tts_status
@@ -106,6 +99,21 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
                 }else{
                     btnPlay.setBackgroundResource(R.drawable.btn_play)
                     tts.stop()
+                }
+            }
+        }
+
+        filter = IntentFilter()
+        filter.addAction(TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED)
+
+        broadCastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(contxt: Context?, intent: Intent?) {
+
+                when (intent?.action) {
+                    TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED -> {
+                        tts_status = false
+                        btnPlay.setBackgroundResource(R.drawable.btn_play)
+                    }
                 }
             }
         }
@@ -151,6 +159,12 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         }
 
 
+    }
+
+    @Override
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(broadCastReceiver)
     }
 
     // Text To Speech
@@ -361,6 +375,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         var meter_value = Math.ceil(Math.sqrt(x_distance+y_distance)) * 100 //m -> cm
         var footfall = (meter_value/ AVERAGE_FOOTFALL).roundToInt()
         footCount.findViewById<TextView>(R.id.txt_footfall_count).text = footfall.toString() + "걸음 후 도착합니다."
+        footCount.findViewById<TextView>(R.id.txt_use_path).text = txt_my_location.text
 
         return Math.ceil(Math.sqrt(x_distance+y_distance))
     }
