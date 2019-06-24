@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.activity_my_location.*
 import kotlinx.android.synthetic.main.layout_path_template.*
 import net.daum.mf.map.api.*
 import resources.RestAPIKey
-import service.LocationService
+import service.KakaoRestService
 import java.util.*
 import kotlin.math.roundToInt
 
@@ -338,7 +338,7 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
     // WGS84 -> WTM
     private fun locationConverter(x: String,y: String,input_coord: String,output_coord: String) {
 
-        subscription = LocationService.distanceRestAPI().distanceConverter(x,y,input_coord,output_coord)
+        subscription = KakaoRestService.distanceRestAPI().distanceConverter(x,y,input_coord,output_coord)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

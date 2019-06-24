@@ -1,6 +1,7 @@
 package service
 
 import `interface`.DistanceInterface
+import `interface`.SearchInterface
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -8,10 +9,15 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-object LocationService {
-    fun distanceRestAPI(): DistanceInterface {
-        return LocationService.retrofitInterface().create(DistanceInterface::class.java)
+object KakaoRestService {
+    fun searchRestAPI(): SearchInterface {
+        return retrofitInterface().create(SearchInterface::class.java)
     }
+
+    fun distanceRestAPI(): DistanceInterface {
+        return retrofitInterface().create(DistanceInterface::class.java)
+    }
+
     private val httpClient = OkHttpClient.Builder()
         .addNetworkInterceptor { chain: Interceptor.Chain -> chain.proceed(chain.request().newBuilder().build()) }!!
 
@@ -20,7 +26,7 @@ object LocationService {
             .baseUrl("https://dapi.kakao.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
-            .client(LocationService.httpClient.build())
+            .client(httpClient.build())
             .build()
     }
 }

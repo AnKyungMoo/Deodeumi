@@ -13,7 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_location_search.*
-import service.SearchService
+import service.KakaoRestService
 
 
 
@@ -52,7 +52,7 @@ class LocationSearchActivity : AppCompatActivity() {
     }
 
     private fun getAddressSearch(keyword: String) {
-        subscription = SearchService.restAPI().addressSearch(keyword)
+        subscription = KakaoRestService.searchRestAPI().addressSearch(keyword)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -66,7 +66,7 @@ class LocationSearchActivity : AppCompatActivity() {
     }
 
     private fun getKeywordSearch(keyword: String) {
-        subscription = SearchService.restAPI().keywordSearch(keyword)
+        subscription = KakaoRestService.searchRestAPI().keywordSearch(keyword)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
