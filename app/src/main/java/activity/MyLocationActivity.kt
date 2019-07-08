@@ -6,10 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -38,8 +34,7 @@ import kotlin.math.roundToInt
 
 
 class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListener
-    , MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener
-    , TextToSpeech.OnInitListener, SensorEventListener{
+    ,MapReverseGeoCoder.ReverseGeoCodingResultListener,MapView.MapViewEventListener, TextToSpeech.OnInitListener{
 
     // var : 읽기/쓰기 가능한 일반 변수 val : 읽기만 가능한 final 변수
     private val AVERAGE_FOOTFALL : Int = 75 //성인 평균 보폭
@@ -67,8 +62,6 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
 
     private var destinationLongitude: Double? = null
     private var destinationLatitude: Double? = null
-
-    private var stepCount: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,28 +159,9 @@ class MyLocationActivity : AppCompatActivity(),MapView.CurrentLocationEventListe
         }
 
 
-        /***************** 걸음 수 측정 ********************/
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
-
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST)
-
-//        btn_map_change.setOnClickListener {
-//            Toast.makeText(this, stepCount.toString(), Toast.LENGTH_SHORT).show()
-//        }
     }
 
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-    }
-
-    override fun onSensorChanged(sensorEvent: SensorEvent?) {
-        if(sensorEvent!!.sensor.type == Sensor.TYPE_STEP_DETECTOR) {
-            if(sensorEvent.values[0] == 1.0f) {
-                stepCount++
-            }
-        }
-    }
-
+    @Override
     override fun onStop() {
         super.onStop()
         unregisterReceiver(broadCastReceiver)
