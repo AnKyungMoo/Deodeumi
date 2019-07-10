@@ -3,7 +3,7 @@
 		xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-		android:background="#ffffff">
+		android:background="@drawable/dialog_shape">
 	
 	<TextView
 			android:id="@+id/txt_center_name"
@@ -40,13 +40,14 @@
 	<Button
 			android:id="@+id/btn_call"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:background="#0b78ad"
+			android:layout_height="40dp"
+			android:background="@drawable/button_radius"
 			android:text="전화"
 			android:textColor="#ffffff"
 			android:textSize="20sp"
 			android:layout_alignParentRight="true"
 			android:layout_marginRight="50dp"
+			android:layout_marginTop="10dp"
 			android:layout_below="@+id/layout_line"/>
 
 </RelativeLayout>
