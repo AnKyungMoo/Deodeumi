@@ -28,7 +28,7 @@ class SplashActivity : AppCompatActivity() {
 
     private inner class SplashHandler : Runnable {
         override fun run() {
-            val i = Intent(this@SplashActivity, MyLocationActivity::class.java)
+            val i = Intent(this@SplashActivity, MapActivity::class.java)
             startActivity(i)
             this@SplashActivity.finish()
         }

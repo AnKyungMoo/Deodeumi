@@ -1,6 +1,5 @@
 package adapter
 
-import activity.MyLocationActivity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent

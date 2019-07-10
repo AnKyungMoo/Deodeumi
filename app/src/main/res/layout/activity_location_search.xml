@@ -5,63 +5,101 @@
         android:layout_height="match_parent"
 		android:background="#ffffff">
 	
+	<!--<RelativeLayout-->
+			<!--android:id="@+id/layout_search_start"-->
+			<!--android:layout_width="match_parent"-->
+			<!--android:layout_height="45dp"-->
+			<!--android:layout_marginTop="23dp"-->
+			<!--android:layout_marginLeft="20dp"-->
+			<!--android:layout_marginRight="20dp"-->
+			<!--android:layout_marginBottom="10dp"-->
+			<!--android:background="@drawable/layout_shape">-->
+		<!---->
+		<!--<TextView-->
+				<!--android:id="@+id/txt_start"-->
+				<!--android:layout_width="wrap_content"-->
+				<!--android:layout_height="wrap_content"-->
+				<!--android:text="출발"-->
+				<!--android:textColor="#939393"-->
+				<!--android:textSize="20sp"-->
+				<!--android:layout_centerVertical="true"-->
+				<!--android:layout_marginStart="15dp"/>-->
+		<!---->
+		<!--<EditText-->
+				<!--android:id="@+id/edit_search_start"-->
+				<!--android:layout_width="match_parent"-->
+				<!--android:layout_height="match_parent"-->
+				<!--android:layout_centerVertical="true"-->
+				<!--android:layout_marginStart="15dp"-->
+				<!--android:background="@null"-->
+				<!--android:hint="출발지를 입력하세요"-->
+				<!--android:textColor="#000000"-->
+				<!--android:layout_toRightOf="@+id/txt_start"/>-->
+		<!---->
+		<!--<Button-->
+				<!--android:id="@+id/btn_close"-->
+				<!--android:layout_width="25dp"-->
+				<!--android:layout_height="25dp"-->
+				<!--android:layout_centerVertical="true"-->
+				<!--android:background="@drawable/btn_close"-->
+				<!--android:layout_marginEnd="10dp"-->
+				<!--android:layout_alignParentRight="true"/>-->
+	<!---->
+	<!---->
+	<!--</RelativeLayout>-->
+	
 	<RelativeLayout
 			android:id="@+id/layout_search_start"
 			android:layout_width="match_parent"
-			android:layout_height="45dp"
-			android:layout_marginTop="23dp"
-			android:layout_marginLeft="20dp"
-			android:layout_marginRight="20dp"
-			android:layout_marginBottom="10dp"
-			android:background="@drawable/layout_shape">
+			android:layout_height="110dp"
+			android:background="@drawable/layout_border">
 		
 		<TextView
+				android:id="@+id/txt_my_location"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="출발: (내위치)"
+				android:textSize="18sp"
+				android:textColor="#000000"
+				android:layout_centerHorizontal="true"
+				android:layout_margin="15dp"/>
+		
+		<RelativeLayout
+			android:layout_width="match_parent"
+			android:layout_height="45dp"
+			android:layout_below="@id/txt_my_location"
+			android:layout_marginLeft="20dp"
+			android:layout_marginRight="20dp"
+			android:layout_marginBottom="15dp"
+			android:background="@drawable/layout_shape">
+			
+			<TextView
 				android:id="@+id/txt_start"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="출발"
+				android:text="도착"
 				android:textColor="#939393"
-				android:textSize="20sp"
+				android:textSize="15sp"
 				android:layout_centerVertical="true"
 				android:layout_marginStart="15dp"/>
-		
-		<EditText
-				android:id="@+id/edit_search_start"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_centerVertical="true"
-				android:layout_marginStart="15dp"
-				android:background="@null"
-				android:hint="출발지를 입력하세요"
-				android:textColor="#000000"
-				android:layout_toRightOf="@+id/txt_start"/>
-		
-		<Button
+			
+			<Button
 				android:id="@+id/btn_close"
-				android:layout_width="25dp"
-				android:layout_height="25dp"
+				android:layout_width="20dp"
+				android:layout_height="20dp"
 				android:layout_centerVertical="true"
 				android:background="@drawable/btn_close"
 				android:layout_marginEnd="10dp"
 				android:layout_alignParentRight="true"/>
-	
-	
+		</RelativeLayout>
+		
 	</RelativeLayout>
-	<LinearLayout
-			android:id="@+id/layout_line"
-			android:layout_width="match_parent"
-			android:layout_height="0.5dp"
-			android:orientation="horizontal"
-			android:background="#707070"
-			android:layout_below="@+id/layout_search_start">
-	</LinearLayout>
-	
 
 	<android.support.v7.widget.RecyclerView
 		android:id="@+id/search_recycler_view"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_below="@+id/layout_line"
+		android:layout_below="@+id/layout_search_start"
 		android:layout_above="@+id/layout_menu_bar"
 		android:background="#ffffff">
 
@@ -81,13 +119,23 @@
 				android:layout_centerInParent="true"
 				android:background="@drawable/btn_play"/>
 		
+		
 		<Button
-				android:id="@+id/btn_map_change"
+				android:id="@+id/btn_count_foot"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:layout_toStartOf="@+id/btn_call_center"
+				android:layout_marginRight="10dp"
+				android:layout_centerVertical="true"
+				android:background="@drawable/btn_foot"/>
+		
+		<Button
+				android:id="@+id/btn_call_center"
 				android:layout_width="40dp"
 				android:layout_height="40dp"
 				android:layout_alignParentRight="true"
 				android:layout_centerVertical="true"
-				android:background="@drawable/btn_map"/>
+				android:background="@drawable/btn_phone"/>
 	
 	</RelativeLayout>
 
