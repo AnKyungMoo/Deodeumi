@@ -260,4 +260,4 @@ Temporary Items
 
 # End of https://www.gitignore.io/api/osx,java,macos,kotlin,android,androidstudio
 
-/app/src/main/java/resources/RestAPIKey.kt
+/app/src/main/java/resources/APIKey.kt
