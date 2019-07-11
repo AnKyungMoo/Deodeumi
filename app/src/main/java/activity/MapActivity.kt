@@ -6,6 +6,9 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import com.km.deodeumi.R
+import resources.APIKey
+import com.skt.Tmap.TMapView
+import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
 
 class MapActivity : AppCompatActivity() {
@@ -16,6 +19,10 @@ class MapActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
+
+        val tMapView = TMapView(this)
+        tMapView.setSKTMapApiKey(APIKey.tmap)
+        map_layout.addView(tMapView)
 
         callBtn = findViewById(R.id.btn_call_center)
         footCountBtn = findViewById(R.id.btn_count_foot)
