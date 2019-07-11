@@ -2,8 +2,12 @@ package activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import com.alexzaitsev.meternumberpicker.MeterView
 import com.km.deodeumi.R
+
+
+
 
 class StrideActivity : AppCompatActivity() {
 
@@ -19,5 +23,9 @@ class StrideActivity : AppCompatActivity() {
 
     }
 
-    //키보드 뒤로가기 눌렀을 때 이벤트 처리해야함 -> 보폭값 전달
+
+    override fun onBackPressed() {
+        Log.i("보폭 수::::", meterView.value.toString())
+        super.onBackPressed()
+    }
 }

@@ -58,7 +58,7 @@ class LocationSearchActivity : AppCompatActivity() {
             .subscribe(
                 { result ->
                     Log.d("addressResultKM", result.documents[0].toString())
-                },
+                },내
                 { err ->
                     Log.e("Error User",err.toString())
                 }
