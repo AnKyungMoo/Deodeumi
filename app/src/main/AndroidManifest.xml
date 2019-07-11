@@ -14,6 +14,8 @@
             android:supportsRtl="true"
             android:theme="@style/NoTitle"
             android:usesCleartextTraffic="true">
+        <activity android:name="activity.StrideActivity">
+        </activity>
         <activity android:name="activity.MapActivity">
         </activity>
         <activity android:name="activity.SplashActivity">
@@ -23,8 +25,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-                android:name="activity.LocationSearchActivity"/>
+        <activity android:name="activity.LocationSearchActivity"/>
+        
         <uses-library
                 android:name="org.apache.http.legacy"
                 android:required="false"/>
