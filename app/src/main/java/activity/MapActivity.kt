@@ -1,6 +1,7 @@
 package activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -37,6 +38,8 @@ class MapActivity : AppCompatActivity() {
             val mAlertDialog = builder.show()
             dialogView.btn_call.setOnClickListener{
                 mAlertDialog.dismiss()
+                /* TODO: 전화번호를 여러 데이터를 받아오면 상황에 맞춰 사용하자 */
+                startActivity(Intent("android.intent.action.CALL", Uri.parse("tel:0220920000")))
             }
 
         }
