@@ -36,7 +36,7 @@ class LocationSearchActivity : AppCompatActivity() {
         dividerItemDecoration.setDrawable(baseContext.getDrawable(R.drawable.recyclerview_divider))
         search_recycler_view.addItemDecoration(dividerItemDecoration)
 
-        edit_search_start.addTextChangedListener(object: TextWatcher{
+        edit_search_destination.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {
                 Log.d("", "")
             }
@@ -46,7 +46,7 @@ class LocationSearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                getKeywordSearch(edit_search_start.text.toString())
+                getKeywordSearch(edit_search_destination.text.toString())
             }
         })
     }

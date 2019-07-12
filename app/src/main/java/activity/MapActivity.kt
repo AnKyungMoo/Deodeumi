@@ -48,6 +48,11 @@ class MapActivity : AppCompatActivity() {
             val intent = Intent(this, StrideActivity::class.java)
             startActivityForResult(intent, 200)
         }
+
+        btn_search_location.setOnClickListener {
+            val intent = Intent(this, LocationSearchActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 
