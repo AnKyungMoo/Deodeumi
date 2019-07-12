@@ -22,6 +22,9 @@ class MapActivity : AppCompatActivity() {
 
         val tMapView = TMapView(this)
         tMapView.setSKTMapApiKey(APIKey.TMAP)
+
+        /* TODO: 현재좌표로 이동을 완료하고 설정하자 true: 나침반 모드 on */
+//        tMapView.setCompassMode(true)
         map_layout.addView(tMapView)
 
         callBtn = findViewById(R.id.btn_call_center)
