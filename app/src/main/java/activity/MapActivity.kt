@@ -21,7 +21,7 @@ class MapActivity : AppCompatActivity() {
         setContentView(R.layout.activity_map)
 
         val tMapView = TMapView(this)
-        tMapView.setSKTMapApiKey(APIKey.tmap)
+        tMapView.setSKTMapApiKey(APIKey.TMAP)
         map_layout.addView(tMapView)
 
         callBtn = findViewById(R.id.btn_call_center)
