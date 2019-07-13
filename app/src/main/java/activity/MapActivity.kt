@@ -18,9 +18,9 @@ import android.widget.Button
 import android.widget.Toast
 import com.km.deodeumi.R
 import com.skt.Tmap.*
+import resources.APIKey
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
-import mapapi.APIKey
 import java.util.*
 
 class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
