@@ -3,6 +3,8 @@ package activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.PointF
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
@@ -14,13 +16,13 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.Toast
 import com.km.deodeumi.R
-import com.skt.Tmap.TMapGpsManager
-import com.skt.Tmap.TMapView
+import com.skt.Tmap.*
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
 import resources.APIKey
+import java.util.*
 
-class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback{
+class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
 
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
     private val PERMISSIONS_REQUEST_CODE: Int = 100
@@ -30,6 +32,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private lateinit var footCountBtn: Button
     private lateinit var tMapView: TMapView
     private lateinit var tMapGpsManager: TMapGpsManager
+    private lateinit var tMapPoint: TMapPoint
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,14 +49,17 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapGpsManager.minDistance = 5F
         tMapGpsManager.provider = TMapGpsManager.NETWORK_PROVIDER
 
+
         if(!checkLocationServiceStatus()){
             showDialogForLocationServiceSetting()
         }
         checkRunTimePermission()
         tMapGpsManager.OpenGps()
 
+
         tMapView.setTrackingMode(true)
         tMapView.setSightVisible(true)
+
 
         callBtn = findViewById(R.id.btn_call_center)
         footCountBtn = findViewById(R.id.btn_count_foot)
@@ -85,8 +91,48 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     override fun onLocationChange(p0: Location?) {
         if (p0 != null) {
+            tMapView.removeAllTMapCircle()
+            tMapView.zoomLevel = 15
+            var circle = TMapCircle()
+            circle.radius = 50.0
+            circle.areaAlpha = 50
+            circle.areaColor = Color.argb(128,255,203,203)
+            circle.lineColor = Color.argb(128,255,203,203)
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
+            tMapView.setCenterPoint(p0.longitude, p0.latitude)
+            tMapPoint = tMapView.locationPoint
+            circle.centerPoint = tMapPoint
+            tMapView.addTMapCircle("circle_test", circle)
         }
+    }
+
+    override fun onPressEvent(
+        p0: ArrayList<TMapMarkerItem>?,
+        p1: ArrayList<TMapPOIItem>?,
+        p2: TMapPoint?,
+        p3: PointF?
+    ): Boolean {
+        if (p2 != null) {
+            tMapView.removeTMapPolyLine("line_test")
+            var polyLine = TMapPolyLine()
+            polyLine.lineColor = Color.RED
+            polyLine.outLineColor = Color.RED
+            polyLine.lineWidth = 4F
+            polyLine.addLinePoint(tMapPoint)
+            polyLine.addLinePoint(TMapPoint(p2.latitude, p2.longitude))
+            tMapView.addTMapPolyLine("line_test", polyLine)
+        }
+
+        return true
+    }
+
+    override fun onPressUpEvent(
+        p0: ArrayList<TMapMarkerItem>?,
+        p1: ArrayList<TMapPOIItem>?,
+        p2: TMapPoint?,
+        p3: PointF?
+    ): Boolean {
+        return true
     }
 
     @Override
