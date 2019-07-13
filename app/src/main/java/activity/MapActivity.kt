@@ -13,13 +13,14 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import com.km.deodeumi.R
 import com.skt.Tmap.*
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
-import resources.APIKey
+import mapapi.APIKey
 import java.util.*
 
 class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
@@ -44,22 +45,24 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapView.setCompassMode(true)
         tMapView.setIconVisibility(true)
 
+
+//        if(!checkLocationServiceStatus()){
+//            showDialogForLocationServiceSetting()
+//        }
+//        checkRunTimePermission()
+
+
+        tMapView.mapType = TMapView.MAPTYPE_STANDARD
+        tMapView.setLanguage(TMapView.LANGUAGE_KOREAN)
+
         tMapGpsManager = TMapGpsManager(this)
         tMapGpsManager.minTime = 1000
         tMapGpsManager.minDistance = 5F
-        tMapGpsManager.provider = TMapGpsManager.NETWORK_PROVIDER
-
-
-        if(!checkLocationServiceStatus()){
-            showDialogForLocationServiceSetting()
-        }
-        checkRunTimePermission()
+        tMapGpsManager.provider = TMapGpsManager.GPS_PROVIDER
         tMapGpsManager.OpenGps()
-
 
         tMapView.setTrackingMode(true)
         tMapView.setSightVisible(true)
-
 
         callBtn = findViewById(R.id.btn_call_center)
         footCountBtn = findViewById(R.id.btn_count_foot)
@@ -90,7 +93,12 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     }
 
     override fun onLocationChange(p0: Location?) {
+
         if (p0 != null) {
+            tMapView.setLocationPoint(p0.latitude, p0.longitude)
+            tMapView.setCenterPoint(p0.latitude, p0.longitude)
+            Log.i("뭔데","?????????????!!!!!!!!!!!!")
+
             tMapView.removeAllTMapCircle()
             tMapView.zoomLevel = 15
             var circle = TMapCircle()
@@ -98,8 +106,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             circle.areaAlpha = 50
             circle.areaColor = Color.argb(128,255,203,203)
             circle.lineColor = Color.argb(128,255,203,203)
-            tMapView.setLocationPoint(p0.longitude, p0.latitude)
-            tMapView.setCenterPoint(p0.longitude, p0.latitude)
             tMapPoint = tMapView.locationPoint
             circle.centerPoint = tMapPoint
             tMapView.addTMapCircle("circle_test", circle)

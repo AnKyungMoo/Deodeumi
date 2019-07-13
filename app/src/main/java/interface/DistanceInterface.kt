@@ -2,15 +2,13 @@ package `interface`
 
 import io.reactivex.Observable
 import models.DistanceObject
-import resources.APIKey
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Headers
 import retrofit2.http.Query
 
 interface DistanceInterface {
     // 좌표 변환
-    @Headers("Authorization: KakaoAK " + APIKey.TMAP)
+    //@Headers("Authorization: KakaoAK " + APIKey.TMAP)
     @GET("v2/local/geo/transcoord.json")
     fun distanceConverter(
         @Query("x") x:String,
@@ -20,7 +18,7 @@ interface DistanceInterface {
         ) : Observable<DistanceObject.Distance>
 
 
-    @Headers("Authorization: KakaoAK " + APIKey.TMAP)
+    //@Headers("Authorization: KakaoAK " + APIKey.TMAP)
     @GET("v2/local/geo/transcoord.json")
     fun testDistance(
         @Query("x") x:String,
