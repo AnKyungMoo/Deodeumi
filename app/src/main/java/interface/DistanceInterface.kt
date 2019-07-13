@@ -10,7 +10,7 @@ import retrofit2.http.Query
 
 interface DistanceInterface {
     // 좌표 변환
-    @Headers("Authorization: KakaoAK " + APIKey.KAKAO)
+    @Headers("Authorization: KakaoAK " + APIKey.TMAP)
     @GET("v2/local/geo/transcoord.json")
     fun distanceConverter(
         @Query("x") x:String,
@@ -20,7 +20,7 @@ interface DistanceInterface {
         ) : Observable<DistanceObject.Distance>
 
 
-    @Headers("Authorization: KakaoAK " + APIKey.KAKAO)
+    @Headers("Authorization: KakaoAK " + APIKey.TMAP)
     @GET("v2/local/geo/transcoord.json")
     fun testDistance(
         @Query("x") x:String,

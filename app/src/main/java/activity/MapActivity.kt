@@ -1,32 +1,59 @@
 package activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
+import android.widget.Toast
 import com.km.deodeumi.R
-import resources.APIKey
+import com.skt.Tmap.TMapGpsManager
 import com.skt.Tmap.TMapView
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
+import resources.APIKey
 
-class MapActivity : AppCompatActivity() {
+class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback{
+
+    private val GPS_ENABLE_REQUEST_CODE: Int = 200
+    private val PERMISSIONS_REQUEST_CODE: Int = 100
+    private var REQUIRED_PERMISSIONS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
     private lateinit var callBtn: Button
     private lateinit var footCountBtn: Button
+    private lateinit var tMapView: TMapView
+    private lateinit var tMapGpsManager: TMapGpsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        val tMapView = TMapView(this)
-        tMapView.setSKTMapApiKey(APIKey.TMAP)
-
-        /* TODO: 현재좌표로 이동을 완료하고 설정하자 true: 나침반 모드 on */
-//        tMapView.setCompassMode(true)
+        tMapView = TMapView(this)
         map_layout.addView(tMapView)
+        tMapView.setSKTMapApiKey(APIKey.TMAP)
+        tMapView.setCompassMode(true)
+        tMapView.setIconVisibility(true)
+
+        tMapGpsManager = TMapGpsManager(this)
+        tMapGpsManager.minTime = 1000
+        tMapGpsManager.minDistance = 5F
+        tMapGpsManager.provider = TMapGpsManager.NETWORK_PROVIDER
+
+        if(!checkLocationServiceStatus()){
+            showDialogForLocationServiceSetting()
+        }
+        checkRunTimePermission()
+        tMapGpsManager.OpenGps()
+
+        tMapView.setTrackingMode(true)
+        tMapView.setSightVisible(true)
 
         callBtn = findViewById(R.id.btn_call_center)
         footCountBtn = findViewById(R.id.btn_count_foot)
@@ -53,6 +80,67 @@ class MapActivity : AppCompatActivity() {
             val intent = Intent(this, LocationSearchActivity::class.java)
             startActivity(intent)
         }
+
+    }
+
+    override fun onLocationChange(p0: Location?) {
+        if (p0 != null) {
+            tMapView.setLocationPoint(p0.longitude, p0.latitude)
+        }
+    }
+
+    @Override
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode){
+            GPS_ENABLE_REQUEST_CODE -> {
+                if(checkLocationServiceStatus()){
+                    checkRunTimePermission()
+                    return
+                }
+            }
+
+        }
+
+    }
+
+    private fun checkLocationServiceStatus():Boolean {
+        var manager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
+    private fun checkRunTimePermission(){
+
+        var hasFineLocationPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if(hasFineLocationPermission == PackageManager.PERMISSION_GRANTED){
+
+        }else{
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,REQUIRED_PERMISSIONS[0])){
+                Toast.makeText(this,"이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
+                    PERMISSIONS_REQUEST_CODE)
+            }else{
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
+                    PERMISSIONS_REQUEST_CODE)
+            }
+
+        }
+    }
+
+    private fun showDialogForLocationServiceSetting(){
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("위치 서비스 비활성화")
+        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
+                + "위치 설정을 수정하시겠습니까?")
+        builder.setCancelable(true)
+        builder.setPositiveButton("설정") { dialog, id ->
+            val callGPSSettingIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivityForResult(callGPSSettingIntent, GPS_ENABLE_REQUEST_CODE)
+        }
+        builder.setNegativeButton("취소") { dialog, id -> dialog.cancel() }
+        builder.create().show()
+
     }
 
 
