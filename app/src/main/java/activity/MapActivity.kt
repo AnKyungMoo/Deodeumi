@@ -1,7 +1,9 @@
 package activity
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.PointF
@@ -9,6 +11,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -36,7 +39,7 @@ import kotlin.math.sin
 
 
 
-class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
+class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback, TextToSpeech.OnInitListener{
 
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
     private val PERMISSIONS_REQUEST_CODE: Int = 100
@@ -55,19 +58,20 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private var des_longitude: Double? = null
     private var des_latitude: Double? = null
 
-    private var subwayCount: Int = 0
-    private var busCount: Int = 0
-    private var walkCount: Int = 0
-
     private var checkPointList = arrayOf<CheckPointModel>()
     private var currentIndex: Int = 0
 
     private var stepCount: Int = 0
 
+    private lateinit var tts: TextToSpeech
+    private lateinit var broadCastReceiver: BroadcastReceiver
+    private lateinit var filter : IntentFilter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
+        var tts_status: Boolean = false
         tMapView = TMapView(this)
         map_layout.addView(tMapView)
         tMapView.setSKTMapApiKey(APIKey.TMAP)
@@ -80,7 +84,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 //        }
 //        checkRunTimePermission()
 
-
+        tts = TextToSpeech(this, this)
         tMapView.mapType = TMapView.MAPTYPE_STANDARD
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN)
 //        tMapView.zoomLevel = 20
@@ -113,7 +117,20 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
         btn_play.setOnClickListener {
-            Log.i("cal: ", calculateAngle())
+            if(checkPointList.isNotEmpty()){
+                registerReceiver(broadCastReceiver, filter)
+                val text: String = calculateAngle() + stepCount + "걸음 전진하세요"
+                Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+
+                tts_status = !tts_status
+                if(tts_status){ //재생 버튼 눌렸을 때 (true)
+                    btn_play.setBackgroundResource(R.drawable.btn_stop)
+                    tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+                }else{
+                    btn_play.setBackgroundResource(R.drawable.btn_play)
+                    tts.stop()
+                }
+            }
         }
 
         btn_count_foot.setOnClickListener{
@@ -126,6 +143,56 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             startActivityForResult(intent, LOCATION_ACTIVITY_CODE)
         }
 
+        filter = IntentFilter()
+        filter.addAction(TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED)
+
+        broadCastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(contxt: Context?, intent: Intent?) {
+
+                when (intent?.action) {
+                    TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED -> {
+                        tts_status = false
+                        btn_play.setBackgroundResource(R.drawable.btn_play)
+                    }
+                }
+            }
+        }
+
+    }
+
+    override fun onInit(status: Int) {
+
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts!!.setLanguage(Locale.KOREA)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS","The Language specified is not supported!")
+            } else {
+                btn_play.isEnabled = true
+                tts.setPitch(0.7f)
+                tts.setSpeechRate(1.2f)
+            }
+
+        } else {
+            Log.e("TTS", "Initilization Failed!")
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(checkPointList.isNotEmpty()){
+            unregisterReceiver(broadCastReceiver)
+        }
+    }
+
+    override fun onDestroy() {
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
+
+        super.onDestroy()
     }
 
     fun settingOdsay(){
@@ -277,10 +344,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                             }catch (e: JSONException){
                                 e.printStackTrace()
                             }
-
-                            Log.i("subway: ", subwayCount.toString())
-                            Log.i("bus: ", busCount.toString())
-                            Log.i("walk: ", walkCount.toString())
                         }
 
                         override fun onError(p0: Int, p1: String?, p2: API?) {
