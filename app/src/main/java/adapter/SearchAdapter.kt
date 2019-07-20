@@ -52,7 +52,7 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
             intent.putExtra("myLocationString", documentList[position].place_name)
             intent.putExtra("longitude", documentList[position].x)
             intent.putExtra("latitude",documentList[position].y)
-            (context as Activity).setResult(0, intent)
+            (context as Activity).setResult(200, intent)
             (context as Activity).finish()
         }
     }

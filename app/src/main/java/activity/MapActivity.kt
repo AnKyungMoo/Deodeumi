@@ -50,7 +50,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private lateinit var tMapView: TMapView
     private lateinit var tMapGpsManager: TMapGpsManager
     private lateinit var tMapPoint: TMapPoint
-    private lateinit var desMapPoint: TMapPoint
+    private var desMapPoint: TMapPoint? = null
     private lateinit var tMapData: TMapData
     private lateinit var oDsayService: ODsayService
 
@@ -115,7 +115,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         }
 
-        /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
         btn_play.setOnClickListener {
             if (checkPointList.isNotEmpty()) {
                 registerReceiver(broadCastReceiver, filter)
@@ -181,9 +180,12 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     override fun onStop() {
         super.onStop()
-        if (checkPointList.isNotEmpty()) {
+        if (broadCastReceiver.isInitialStickyBroadcast) {
             unregisterReceiver(broadCastReceiver)
         }
+//        if (checkPointList.isNotEmpty()) {
+//            unregisterReceiver(broadCastReceiver)
+//        }
     }
 
     override fun onDestroy() {
@@ -267,23 +269,20 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             }
 
             LOCATION_ACTIVITY_CODE -> {
-                if (resultCode == 0) {
-//                    des_text = data!!.getStringExtra("myLocationString").toString()
+                if (resultCode == 200) {
                     des_longitude = data!!.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
-
-                    Log.i("cooool", des_latitude.toString() + " " + des_longitude)
 
                     var startLatitude: Double = 0.0
                     var startLongitude: Double = 0.0
 
                     var callbackListener = object : OnResultCallbackListener {
-                        override fun onSuccess(odsayData: ODsayData?, api: API?) {
+                        override fun onSuccess(odsayData: ODsayData, api: API?) {
                             try {
                                 if (api == API.SEARCH_PUB_TRANS_PATH) { //대중교통 길찾기
                                     //최초 출발역
                                     val jArray: JSONArray =
-                                        odsayData!!.json.getJSONObject("result").getJSONArray("path")
+                                        odsayData.json.getJSONObject("result").getJSONArray("path")
                                     Log.i("array_size", jArray.length().toString())
                                     val jObject = jArray.getJSONObject(0)
                                     val jInfo = jObject.getJSONObject("info")
@@ -296,10 +295,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                         val subPath = jSubPath.getJSONObject(j)
                                         Log.d("path?", subPath.toString())
                                         if (subPath.getInt("trafficType") != 3) { // 도보가 아니
-                                            //subPath.getJSONArray("lane").getJSONObject(0).getString("busNo")
                                             var starName = subPath.getString("startName")
                                             Log.i(
-                                                "startName",
+                                                "c",
                                                 j.toString() + ": " + subPath.getInt("trafficType").toString() + "-->" + starName + ": " + subPath.getString(
                                                     "startX"
                                                 ) + "," + subPath.getString("startY")
@@ -312,7 +310,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                             tMapData.findPathDataWithType(
                                                 TMapData.TMapPathType.PEDESTRIAN_PATH,
                                                 tMapView.locationPoint,
-                                                desMapPoint
+                                                desMapPoint!!
                                             ) { polyLine ->
                                                 polyLine.lineColor = Color.BLUE
 
@@ -339,8 +337,41 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                             break
                                         }
                                     }
+
+
                                 }
                             } catch (e: JSONException) {
+                                if (desMapPoint == null) {
+                                    desMapPoint = TMapPoint(des_latitude!!, des_longitude!!)
+
+                                    tMapData.findPathDataWithType(
+                                        TMapData.TMapPathType.PEDESTRIAN_PATH,
+                                        tMapView.locationPoint,
+                                        desMapPoint!!
+                                    ) { polyLine ->
+                                        polyLine.lineColor = Color.BLUE
+
+                                        var index = 0
+                                        checkPointList = arrayOf()
+                                        polyLine.linePoint.forEach { item ->
+                                            val checkPointModel = CheckPointModel(false, item.latitude, item.longitude)
+                                            checkPointList += checkPointModel
+
+                                            val point = TMapPoint(item.latitude, item.longitude)
+                                            val tMapCircle = TMapCircle()
+                                            tMapCircle.centerPoint = point
+                                            tMapCircle.radius = 1.0
+                                            tMapCircle.circleWidth = 1f
+                                            tMapCircle.lineColor = Color.RED
+                                            tMapCircle.areaColor = Color.RED
+                                            tMapCircle.areaAlpha = 100
+                                            tMapView.addTMapCircle("circle$index", tMapCircle)
+                                            index++
+                                        }
+
+                                        tMapView.addTMapPath(polyLine)
+                                    }
+                                }
                                 e.printStackTrace()
                             }
                         }
@@ -355,6 +386,8 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                         tMapView.longitude.toString(), tMapView.latitude.toString()
                         , des_longitude.toString(), des_latitude.toString(), "0", "0", "0", callbackListener
                     )
+
+                    desMapPoint = null
                 }
             }
         }
