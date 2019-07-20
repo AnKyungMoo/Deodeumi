@@ -113,9 +113,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
         btn_play.setOnClickListener {
-//            Toast.makeText(this, distance(tMapPoint.latitude, tMapPoint.longitude,
-//                checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude).toString(), Toast.LENGTH_SHORT).show()
-            Toast.makeText(this, tMapView.rotate.toInt().toString(), Toast.LENGTH_SHORT).show()
+            Log.i("cal: ", calculateAngle())
         }
 
         btn_count_foot.setOnClickListener{
@@ -323,7 +321,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         val destinationLongitudeRadian: Double = checkPointList[currentIndex].longitude * (3.141592 / 180)
 
         val radianDistance: Double = acos(sin(beginLatitudeRadian) * sin(destinationLatitudeRadian) + cos(beginLatitudeRadian) * cos(destinationLatitudeRadian) * cos(beginLongitudeRadian - destinationLongitudeRadian))
-
         val radianBearing: Double = acos((sin(destinationLatitudeRadian) - sin(beginLatitudeRadian) * cos(radianDistance)) / (cos(beginLatitudeRadian) * sin(radianDistance)))
 
         var trueBearing: Double = 0.0
@@ -331,15 +328,21 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         {
             trueBearing = radianBearing * (180 / 3.141592)
             trueBearing = 360 - trueBearing
-        }
+        } //trueBearing: 도착점 각도
         else
         {
             trueBearing = radianBearing * (180 / 3.141592)
         }
 
-        // 각도 계산
-        val angle = trueBearing.toInt() - tMapView.rotate.toInt()
 
+        var rotate = if(tMapView.rotate.toInt() > 0){
+            360 - tMapView.rotate.toInt()
+        }else{
+            tMapView.rotate.toInt()*-1
+        }
+
+        // 각도 계산
+        val angle = trueBearing.toInt() - rotate
         var result: String
         if (angle >= 0) {
             result = (angle / 30).toString() + "시"
