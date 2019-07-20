@@ -38,8 +38,8 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 
-
-class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback, TextToSpeech.OnInitListener{
+class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback,
+    TextToSpeech.OnInitListener {
 
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
     private val PERMISSIONS_REQUEST_CODE: Int = 100
@@ -65,7 +65,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     private lateinit var tts: TextToSpeech
     private lateinit var broadCastReceiver: BroadcastReceiver
-    private lateinit var filter : IntentFilter
+    private lateinit var filter: IntentFilter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,7 +107,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             val builder = AlertDialog.Builder(this)
                 .setView(dialogView)
             val mAlertDialog = builder.show()
-            dialogView.btn_call.setOnClickListener{
+            dialogView.btn_call.setOnClickListener {
                 mAlertDialog.dismiss()
                 /* TODO: 전화번호를 여러 데이터를 받아오면 상황에 맞춰 사용하자 */
                 startActivity(Intent("android.intent.action.CALL", Uri.parse("tel:0220920000")))
@@ -117,23 +117,23 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
         btn_play.setOnClickListener {
-            if(checkPointList.isNotEmpty()){
+            if (checkPointList.isNotEmpty()) {
                 registerReceiver(broadCastReceiver, filter)
                 val text: String = calculateAngle() + stepCount + "걸음 전진하세요"
                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 
                 tts_status = !tts_status
-                if(tts_status){ //재생 버튼 눌렸을 때 (true)
+                if (tts_status) { //재생 버튼 눌렸을 때 (true)
                     btn_play.setBackgroundResource(R.drawable.btn_stop)
                     tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
-                }else{
+                } else {
                     btn_play.setBackgroundResource(R.drawable.btn_play)
                     tts.stop()
                 }
             }
         }
 
-        btn_count_foot.setOnClickListener{
+        btn_count_foot.setOnClickListener {
             val intent = Intent(this, StrideActivity::class.java)
             startActivityForResult(intent, 200)
         }
@@ -167,7 +167,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             val result = tts!!.setLanguage(Locale.KOREA)
 
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("TTS","The Language specified is not supported!")
+                Log.e("TTS", "The Language specified is not supported!")
             } else {
                 btn_play.isEnabled = true
                 tts.setPitch(0.7f)
@@ -181,7 +181,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     override fun onStop() {
         super.onStop()
-        if(checkPointList.isNotEmpty()){
+        if (checkPointList.isNotEmpty()) {
             unregisterReceiver(broadCastReceiver)
         }
     }
@@ -195,7 +195,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         super.onDestroy()
     }
 
-    fun settingOdsay(){
+    fun settingOdsay() {
         oDsayService = ODsayService.init(this, APIKey.ODsay)
         oDsayService.setConnectionTimeout(5000)
         oDsayService.setConnectionTimeout(5000)
@@ -214,14 +214,17 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             tMapPoint = TMapPoint(p0.latitude, p0.longitude)
 
             tMapData.convertGpsToAddress(p0.latitude, p0.longitude) {
-                var location: String = it.substring(0,13)
+                var location: String = it.substring(0, 13)
                 Log.i("location", location)
                 locationText.text = "출발: ".plus(it)
             }
 
             if (checkPointList.isNotEmpty()) {
-                if (distance(p0.latitude, p0.longitude,
-                        checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude) <= 3) {
+                if (distance(
+                        p0.latitude, p0.longitude,
+                        checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude
+                    ) <= 3
+                ) {
                     checkPointList[currentIndex].isVisit = true
                     currentIndex++
                     Toast.makeText(this, "도착!", Toast.LENGTH_LONG).show()
@@ -255,7 +258,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     @Override
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode) {
+        when (requestCode) {
             GPS_ENABLE_REQUEST_CODE -> {
                 if (checkLocationServiceStatus()) {
                     checkRunTimePermission()
@@ -265,99 +268,93 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
             LOCATION_ACTIVITY_CODE -> {
                 if (resultCode == 0) {
-                    des_text = data!!.getStringExtra("myLocationString").toString()
-                    des_longitude = data.getStringExtra("longitude").toDouble()
+//                    des_text = data!!.getStringExtra("myLocationString").toString()
+                    des_longitude = data!!.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
 
-                    desMapPoint = TMapPoint(des_latitude!!, des_longitude!!)
+                    Log.i("cooool", des_latitude.toString() + " " + des_longitude)
 
-                    tMapData.findPathDataWithType(
-                        TMapData.TMapPathType.PEDESTRIAN_PATH,
-                        tMapView.locationPoint,
-                        desMapPoint
-                    ) { polyLine ->
-                        polyLine.lineColor = Color.BLUE
+                    var startLatitude: Double = 0.0
+                    var startLongitude: Double = 0.0
 
-                        var index = 0
-                        checkPointList = arrayOf()
-                        polyLine.linePoint.forEach { item ->
-                            val checkPointModel = CheckPointModel(false, item.latitude, item.longitude)
-                            checkPointList += checkPointModel
-
-                            val point = TMapPoint(item.latitude, item.longitude)
-                            val tMapCircle = TMapCircle()
-                            tMapCircle.centerPoint = point
-                            tMapCircle.radius = 1.0
-                            tMapCircle.circleWidth = 1f
-                            tMapCircle.lineColor = Color.RED
-                            tMapCircle.areaColor = Color.RED
-                            tMapCircle.areaAlpha = 100
-                            tMapView.addTMapCircle("circle$index", tMapCircle)
-                            index++
-                        }
-
-                        tMapView.addTMapPath(polyLine)
-                    }
-
-                    var callbackListener = object: OnResultCallbackListener {
+                    var callbackListener = object : OnResultCallbackListener {
                         override fun onSuccess(odsayData: ODsayData?, api: API?) {
                             try {
-                                if(api== API.SEARCH_PUB_TRANS_PATH){ //대중교통 길찾기
+                                if (api == API.SEARCH_PUB_TRANS_PATH) { //대중교통 길찾기
                                     //최초 출발역
-                                    val jArray: JSONArray = odsayData!!.json.getJSONObject("result").getJSONArray("path")
+                                    val jArray: JSONArray =
+                                        odsayData!!.json.getJSONObject("result").getJSONArray("path")
                                     Log.i("array_size", jArray.length().toString())
-                                    for(i in 0..jArray.length()-1){
-                                        val jObject = jArray.getJSONObject(i)
-                                        val jInfo = jObject.getJSONObject("info")
-                                        val first = jInfo.getString("firstStartStation")
-                                        val last = jInfo.getString("lastEndStation")
-                                        val jSubPath = jObject.getJSONArray("subPath")
-                                        Log.i("first", first)
-                                        Log.i("last", last)
-                                        for (j in 0 until jSubPath.length()) {
-                                            val subPath = jSubPath.getJSONObject(j)
-                                            if (subPath.getInt("trafficType") != 3) { // 도보가 아니
-                                                //subPath.getJSONArray("lane").getJSONObject(0).getString("busNo")
-                                                var starName = subPath.getString("startName")
-                                                Log.i("startName", j.toString()+": "+subPath.getInt("trafficType").toString()+"-->"+starName+": "+subPath.getString("startX")+","+subPath.getString("startY"))
+                                    val jObject = jArray.getJSONObject(0)
+                                    val jInfo = jObject.getJSONObject("info")
+                                    val first = jInfo.getString("firstStartStation")
+                                    val last = jInfo.getString("lastEndStation")
+                                    val jSubPath = jObject.getJSONArray("subPath")
+                                    Log.i("first", first)
+                                    Log.i("last", last)
+                                    for (j in 0 until jSubPath.length()) {
+                                        val subPath = jSubPath.getJSONObject(j)
+                                        Log.d("path?", subPath.toString())
+                                        if (subPath.getInt("trafficType") != 3) { // 도보가 아니
+                                            //subPath.getJSONArray("lane").getJSONObject(0).getString("busNo")
+                                            var starName = subPath.getString("startName")
+                                            Log.i(
+                                                "startName",
+                                                j.toString() + ": " + subPath.getInt("trafficType").toString() + "-->" + starName + ": " + subPath.getString(
+                                                    "startX"
+                                                ) + "," + subPath.getString("startY")
+                                            )
+                                            startLatitude = subPath.getString("startY").toDouble()
+                                            startLongitude = subPath.getString("startX").toDouble()
+
+                                            desMapPoint = TMapPoint(startLatitude, startLongitude)
+
+                                            tMapData.findPathDataWithType(
+                                                TMapData.TMapPathType.PEDESTRIAN_PATH,
+                                                tMapView.locationPoint,
+                                                desMapPoint
+                                            ) { polyLine ->
+                                                polyLine.lineColor = Color.BLUE
+
+                                                var index = 0
+                                                checkPointList = arrayOf()
+                                                polyLine.linePoint.forEach { item ->
+                                                    val checkPointModel = CheckPointModel(false, item.latitude, item.longitude)
+                                                    checkPointList += checkPointModel
+
+                                                    val point = TMapPoint(item.latitude, item.longitude)
+                                                    val tMapCircle = TMapCircle()
+                                                    tMapCircle.centerPoint = point
+                                                    tMapCircle.radius = 1.0
+                                                    tMapCircle.circleWidth = 1f
+                                                    tMapCircle.lineColor = Color.RED
+                                                    tMapCircle.areaColor = Color.RED
+                                                    tMapCircle.areaAlpha = 100
+                                                    tMapView.addTMapCircle("circle$index", tMapCircle)
+                                                    index++
+                                                }
+
+                                                tMapView.addTMapPath(polyLine)
                                             }
-
+                                            break
                                         }
-
                                     }
-
-
-
-//                                    for (i in 0..jArray.length()-1) {
-//                                        val jObject = jArray.getJSONObject(i)
-//                                        val jInfo = jObject.getJSONObject("info")
-//                                        val jSubPath = jObject.getJSONArray("subPath")
-//
-//
-//                                        Log.i("count", jSubPath.length().toString())
-//                                        for (j in 0..jSubPath.length()-1) {
-//                                            val subPath = jSubPath.getJSONObject(j)
-//                                            if (subPath.getInt("trafficType") != 3) {
-//                                                var first = jInfo.getString("firstStartStation")
-//                                                Log.i("first", first)
-//                                                break
-//                                            }
-//                                        }
-//
-//                                    }
                                 }
-                            }catch (e: JSONException){
+                            } catch (e: JSONException) {
                                 e.printStackTrace()
                             }
                         }
 
                         override fun onError(p0: Int, p1: String?, p2: API?) {
-                            if(p2== API.SEARCH_PUB_TRANS_PATH){}
+                            if (p2 == API.SEARCH_PUB_TRANS_PATH) {
+                            }
                         }
                     }
 
-                    oDsayService.requestSearchPubTransPath(tMapView.longitude.toString(), tMapView.latitude.toString()
-                        , des_longitude.toString(), des_latitude.toString(),"0","0","0",callbackListener)
+                    oDsayService.requestSearchPubTransPath(
+                        tMapView.longitude.toString(), tMapView.latitude.toString()
+                        , des_longitude.toString(), des_latitude.toString(), "0", "0", "0", callbackListener
+                    )
                 }
             }
         }
@@ -365,18 +362,19 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Int {
         val theta = lon1 - lon2
-        var dist = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(theta))
+        var dist =
+            sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(theta))
 
         dist = acos(dist)
         dist = rad2deg(dist)
         dist = dist * 60 * 1.1515
 
         dist *= 1609.344
-        val cm = Math.ceil(dist)*100 //cm
+        val cm = Math.ceil(dist) * 100 //cm
         val step = getSharedPreferences("step", MODE_PRIVATE)
         val stride = step.getInt("distance", 75) //보폭
-        stepCount = (cm/stride).roundToInt()
-        Log.i("걸음수: ", stepCount.toString()+" "+cm)
+        stepCount = (cm / stride).roundToInt()
+        Log.i("걸음수: ", stepCount.toString() + " " + cm)
 
         return dist.toInt()
     } // m -> cm -> 걸음 수 환산(shared에서 가져오기) -> 걸음!
@@ -388,25 +386,31 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         val destinationLatitudeRadian: Double = checkPointList[currentIndex].latitude * (3.141592 / 180)
         val destinationLongitudeRadian: Double = checkPointList[currentIndex].longitude * (3.141592 / 180)
 
-        val radianDistance: Double = acos(sin(beginLatitudeRadian) * sin(destinationLatitudeRadian) + cos(beginLatitudeRadian) * cos(destinationLatitudeRadian) * cos(beginLongitudeRadian - destinationLongitudeRadian))
-        val radianBearing: Double = acos((sin(destinationLatitudeRadian) - sin(beginLatitudeRadian) * cos(radianDistance)) / (cos(beginLatitudeRadian) * sin(radianDistance)))
+        val radianDistance: Double = acos(
+            sin(beginLatitudeRadian) * sin(destinationLatitudeRadian) + cos(beginLatitudeRadian) * cos(
+                destinationLatitudeRadian
+            ) * cos(beginLongitudeRadian - destinationLongitudeRadian)
+        )
+        val radianBearing: Double = acos(
+            (sin(destinationLatitudeRadian) - sin(beginLatitudeRadian) * cos(radianDistance)) / (cos(beginLatitudeRadian) * sin(
+                radianDistance
+            ))
+        )
 
         var trueBearing: Double = 0.0
-        if (sin(destinationLongitudeRadian - beginLongitudeRadian) < 0)
-        {
+        if (sin(destinationLongitudeRadian - beginLongitudeRadian) < 0) {
             trueBearing = radianBearing * (180 / 3.141592)
             trueBearing = 360 - trueBearing
         } //trueBearing: 도착점 각도
-        else
-        {
+        else {
             trueBearing = radianBearing * (180 / 3.141592)
         }
 
 
-        var rotate = if(tMapView.rotate.toInt() > 0){
+        var rotate = if (tMapView.rotate.toInt() > 0) {
             360 - tMapView.rotate.toInt()
-        }else{
-            tMapView.rotate.toInt()*-1
+        } else {
+            tMapView.rotate.toInt() * -1
         }
 
         // 각도 계산
@@ -446,35 +450,42 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         return (rad * 180 / Math.PI)
     }
 
-    private fun checkLocationServiceStatus():Boolean {
+    private fun checkLocationServiceStatus(): Boolean {
         var manager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
 
-    private fun checkRunTimePermission(){
+    private fun checkRunTimePermission() {
 
-        var hasFineLocationPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-        if(hasFineLocationPermission == PackageManager.PERMISSION_GRANTED){
+        var hasFineLocationPermission =
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (hasFineLocationPermission == PackageManager.PERMISSION_GRANTED) {
 
-        }else{
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this,REQUIRED_PERMISSIONS[0])){
-                Toast.makeText(this,"이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show()
-                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
-                    PERMISSIONS_REQUEST_CODE)
-            }else{
-                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS,
-                    PERMISSIONS_REQUEST_CODE)
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])) {
+                Toast.makeText(this, "이 앱을 실행하려면 위치 접근 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+                ActivityCompat.requestPermissions(
+                    this, REQUIRED_PERMISSIONS,
+                    PERMISSIONS_REQUEST_CODE
+                )
+            } else {
+                ActivityCompat.requestPermissions(
+                    this, REQUIRED_PERMISSIONS,
+                    PERMISSIONS_REQUEST_CODE
+                )
             }
 
         }
     }
 
-    private fun showDialogForLocationServiceSetting(){
+    private fun showDialogForLocationServiceSetting() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("위치 서비스 비활성화")
-        builder.setMessage("앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
-                + "위치 설정을 수정하시겠습니까?")
+        builder.setMessage(
+            "앱을 사용하기 위해서는 위치 서비스가 필요합니다.\n"
+                    + "위치 설정을 수정하시겠습니까?"
+        )
         builder.setCancelable(true)
         builder.setPositiveButton("설정") { dialog, id ->
             val callGPSSettingIntent = Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)
