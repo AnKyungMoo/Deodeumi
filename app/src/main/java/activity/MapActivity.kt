@@ -234,45 +234,41 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                 if(api== API.SEARCH_PUB_TRANS_PATH){ //대중교통 길찾기
                                     //최초 출발역
                                     val jArray: JSONArray = odsayData!!.json.getJSONObject("result").getJSONArray("path")
-                                    Log.i("??",jArray.toString())
-
-                                    for (i in 0..jArray.length()-1) {
+                                    for(i in 0..jArray.length()-1){
                                         val jObject = jArray.getJSONObject(i)
-//                                        if(jObject.getInt("pathType") == 3){
-
-
+                                        val jInfo = jObject.getJSONObject("info")
                                         val jSubPath = jObject.getJSONArray("subPath")
-                                        for(j in 0..jSubPath.length()-1){
+
+                                        for (j in 0..jSubPath.length()-1) {
                                             val subPath = jSubPath.getJSONObject(j)
-                                            if (subPath.getInt("trafficType") == 1) { //1:지하철 , 2:버스, 3:도보
-                                                Log.i("subwayname: ", subPath.getString("startName"))
-                                                subwayCount += 1
-                                            } else if(subPath.getInt("trafficType") ==2 ){
-                                                busCount += 1
-                                            } else {
-                                                Log.i("이동거리: ", subPath.getString("distance").toString())
-                                                Log.i("소요시간: ", subPath.getString("sectionTime").toString())
-                                                walkCount += 1
+                                            if (subPath.getInt("trafficType") != 3) { // 도보
+                                                var passList = subPath.getJSONObject("passStopList")
+                                                var stations = passList.getJSONArray("stations")
+                                                stations
+
+
                                             }
+
                                         }
-//                                        }
+                                    }
+
+//                                    for (i in 0..jArray.length()-1) {
+//                                        val jObject = jArray.getJSONObject(i)
 //                                        val jInfo = jObject.getJSONObject("info")
 //                                        val jSubPath = jObject.getJSONArray("subPath")
-
+//
+//
+//                                        Log.i("count", jSubPath.length().toString())
 //                                        for (j in 0..jSubPath.length()-1) {
 //                                            val subPath = jSubPath.getJSONObject(j)
-//                                            if (subPath.getInt("trafficType") == 1) { //1:지하철 , 2:버스, 3:도보
-//                                                Log.i("subwayname: ", subPath.getString("startName"))
-//                                                subwayCount += 1
-//                                            } else if(subPath.getInt("trafficType") ==2 ){
-//                                                busCount += 1
-//                                            } else {
-//                                                Log.i("이동거리: ", subPath.getString("distance").toString())
-//                                                Log.i("소요시간: ", subPath.getString("sectionTime").toString())
-//                                                walkCount += 1
+//                                            if (subPath.getInt("trafficType") != 3) {
+//                                                var first = jInfo.getString("firstStartStation")
+//                                                Log.i("first", first)
+//                                                break
 //                                            }
 //                                        }
-                                    }
+//
+//                                    }
                                 }
                             }catch (e: JSONException){
                                 e.printStackTrace()
@@ -287,6 +283,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                             if(p2== API.SEARCH_PUB_TRANS_PATH){}
                         }
                     }
+
+                    oDsayService.requestSearchPubTransPath(tMapView.longitude.toString(), tMapView.latitude.toString()
+                        , des_longitude.toString(), des_latitude.toString(),"0","0","0",callbackListener)
                 }
             }
         }
