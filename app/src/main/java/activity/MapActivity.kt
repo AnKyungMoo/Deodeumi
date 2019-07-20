@@ -305,23 +305,28 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                 if(api== API.SEARCH_PUB_TRANS_PATH){ //대중교통 길찾기
                                     //최초 출발역
                                     val jArray: JSONArray = odsayData!!.json.getJSONObject("result").getJSONArray("path")
+                                    Log.i("array_size", jArray.length().toString())
                                     for(i in 0..jArray.length()-1){
                                         val jObject = jArray.getJSONObject(i)
                                         val jInfo = jObject.getJSONObject("info")
+                                        val first = jInfo.getString("firstStartStation")
+                                        val last = jInfo.getString("lastEndStation")
                                         val jSubPath = jObject.getJSONArray("subPath")
-
-                                        for (j in 0..jSubPath.length()-1) {
+                                        Log.i("first", first)
+                                        Log.i("last", last)
+                                        for (j in 0 until jSubPath.length()) {
                                             val subPath = jSubPath.getJSONObject(j)
-                                            if (subPath.getInt("trafficType") != 3) { // 도보
-                                                var passList = subPath.getJSONObject("passStopList")
-                                                var stations = passList.getJSONArray("stations")
-                                                stations
-
-
+                                            if (subPath.getInt("trafficType") != 3) { // 도보가 아니
+                                                //subPath.getJSONArray("lane").getJSONObject(0).getString("busNo")
+                                                var starName = subPath.getString("startName")
+                                                Log.i("startName", j.toString()+": "+subPath.getInt("trafficType").toString()+"-->"+starName+": "+subPath.getString("startX")+","+subPath.getString("startY"))
                                             }
 
                                         }
+
                                     }
+
+
 
 //                                    for (i in 0..jArray.length()-1) {
 //                                        val jObject = jArray.getJSONObject(i)
