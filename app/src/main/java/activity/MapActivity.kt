@@ -31,6 +31,7 @@ import resources.APIKey
 import java.util.*
 import kotlin.math.acos
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 
@@ -60,6 +61,8 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     private var checkPointList = arrayOf<CheckPointModel>()
     private var currentIndex: Int = 0
+
+    private var stepCount: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -295,7 +298,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     }
 
     private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Int {
-        var theta = lon1 - lon2
+        val theta = lon1 - lon2
         var dist = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(theta))
 
         dist = acos(dist)
@@ -303,8 +306,14 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         dist = dist * 60 * 1.1515
 
         dist *= 1609.344
+        val cm = Math.ceil(dist)*100 //cm
+        val step = getSharedPreferences("step", MODE_PRIVATE)
+        val stride = step.getInt("distance", 75) //보폭
+        stepCount = (cm/stride).roundToInt()
+        Log.i("걸음수: ", stepCount.toString()+" "+cm)
+
         return dist.toInt()
-    }
+    } // m -> cm -> 걸음 수 환산(shared에서 가져오기) -> 걸음!
 
     private fun calculateAngle(): String {
         /* 각도 계산하는 부분 */
