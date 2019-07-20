@@ -62,7 +62,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         tMapView.mapType = TMapView.MAPTYPE_STANDARD
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN)
-        tMapView.zoomLevel = 20
+//        tMapView.zoomLevel = 20
 
         tMapGpsManager = TMapGpsManager(this)
         tMapGpsManager.minTime = 1000
@@ -109,7 +109,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
             tMapView.setCenterPoint(p0.longitude, p0.latitude)
             tMapView.removeAllTMapCircle()
-            tMapView.zoomLevel = 20
+//            tMapView.zoomLevel = 20
             tMapPoint = TMapPoint(tMapView.longitude, tMapView.latitude)
 
             tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
@@ -164,8 +164,10 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                     tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) {
                         it.lineColor = Color.BLUE
 
-                        it.passPoint.forEach{
-                            Log.d("CheckPointKM", it.latitude.toString() + " " + it.longitude)
+                        Log.d("checkcheck", it.linePoint.size.toString())
+
+                        it.linePoint.forEach {that ->
+                            Log.d("CheckPointKM", that.latitude.toString() + " " + that.longitude)
                         }
                         tMapView.addTMapPath(it)
                     }
