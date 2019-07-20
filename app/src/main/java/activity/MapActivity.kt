@@ -110,8 +110,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
         btn_play.setOnClickListener {
-            Toast.makeText(this, distance(tMapPoint.latitude, tMapPoint.longitude,
-                checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude).toString(), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, distance(tMapPoint.latitude, tMapPoint.longitude,
+//                checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude).toString(), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, tMapView.rotate.toInt().toString(), Toast.LENGTH_SHORT).show()
         }
 
         btn_count_foot.setOnClickListener{
@@ -138,6 +139,8 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
             tMapView.setCenterPoint(p0.longitude, p0.latitude)
+            /* TODO: 지도 움직이면 회전을 안하는 버그를 처리하는 방법을 알게되면 고치자 */
+            tMapView.setCompassMode(true)
 //            tMapView.removeAllTMapCircle()
 //            tMapView.zoxomLevel = 20
             tMapPoint = TMapPoint(p0.latitude, p0.longitude)
@@ -292,7 +295,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     }
 
     private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Int {
-
         var theta = lon1 - lon2
         var dist = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(theta))
 
@@ -304,6 +306,55 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         return dist.toInt()
     }
 
+    private fun calculateAngle(): String {
+        /* 각도 계산하는 부분 */
+        val beginLatitudeRadian: Double = tMapPoint.latitude * (3.141592 / 180)
+        val beginLongitudeRadian: Double = tMapPoint.longitude * (3.141592 / 180)
+        val destinationLatitudeRadian: Double = checkPointList[currentIndex].latitude * (3.141592 / 180)
+        val destinationLongitudeRadian: Double = checkPointList[currentIndex].longitude * (3.141592 / 180)
+
+        val radianDistance: Double = acos(sin(beginLatitudeRadian) * sin(destinationLatitudeRadian) + cos(beginLatitudeRadian) * cos(destinationLatitudeRadian) * cos(beginLongitudeRadian - destinationLongitudeRadian))
+
+        val radianBearing: Double = acos((sin(destinationLatitudeRadian) - sin(beginLatitudeRadian) * cos(radianDistance)) / (cos(beginLatitudeRadian) * sin(radianDistance)))
+
+        var trueBearing: Double = 0.0
+        if (sin(destinationLongitudeRadian - beginLongitudeRadian) < 0)
+        {
+            trueBearing = radianBearing * (180 / 3.141592)
+            trueBearing = 360 - trueBearing
+        }
+        else
+        {
+            trueBearing = radianBearing * (180 / 3.141592)
+        }
+
+        // 각도 계산
+        val angle = trueBearing.toInt() - tMapView.rotate.toInt()
+
+        var result: String
+        if (angle >= 0) {
+            result = (angle / 30).toString() + "시"
+
+            if ((angle % 30) >= 12) {
+                result += " 반 "
+            }
+        } else {
+            result = (12 - (Math.abs(angle) / 30)).toString() + "시"
+
+            if ((angle % 30) >= 12) {
+                result += " 반 "
+            }
+        }
+
+        /* TODO: 0시 일때는 회전하라는 메시지가 안넘어가게 하자
+         * TODO: 0시 반일 때는 넘어가야 됨
+         * */
+        return if (result[0] != '0') {
+            result + "방향으로 회전하고 "
+        } else {
+            "전방으로 "
+        }
+    }
 
     // This function converts decimal degrees to radians
     private fun deg2rad(deg: Double): Double {
