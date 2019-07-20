@@ -17,9 +17,14 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
+import com.odsay.odsayandroidsdk.API
+import com.odsay.odsayandroidsdk.ODsayData
+import com.odsay.odsayandroidsdk.ODsayService
+import com.odsay.odsayandroidsdk.OnResultCallbackListener
 import com.skt.Tmap.*
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
+import org.json.JSONException
 import resources.APIKey
 import java.util.*
 
@@ -36,6 +41,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private lateinit var tMapPoint: TMapPoint
     private lateinit var desMapPoint: TMapPoint
     private lateinit var tMapData: TMapData
+    private lateinit var oDsayService: ODsayService
 
     private var des_text: String? = null
     private var des_longitude: Double? = null
@@ -52,7 +58,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapView.setSKTMapApiKey(APIKey.TMAP)
         tMapView.setCompassMode(true)
         tMapView.setIconVisibility(true)
-
+        settingOdsay()
 
 //        if(!checkLocationServiceStatus()){
 //            showDialogForLocationServiceSetting()
@@ -100,6 +106,12 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             startActivityForResult(intent, LOCATION_ACTIVITY_CODE)
         }
 
+    }
+
+    fun settingOdsay(){
+        oDsayService = ODsayService.init(this, APIKey.ODsay)
+        oDsayService.setConnectionTimeout(5000)
+        oDsayService.setConnectionTimeout(5000)
     }
 
     override fun onLocationChange(p0: Location?) {
@@ -158,15 +170,34 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                     des_text = data!!.getStringExtra("myLocationString").toString()
                     des_longitude = data.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
-
                     tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) {
                         it.lineColor = Color.BLUE
-
                         it.passPoint.forEach{
                             Log.d("CheckPointKM", it.latitude.toString() + " " + it.longitude)
                         }
                         tMapView.addTMapPath(it)
                     }
+
+                    var callbackListener = object: OnResultCallbackListener {
+                        override fun onSuccess(p0: ODsayData?, p1: API?) {
+                            try {
+                                if(p1== API.SEARCH_PUB_TRANS_PATH){ //대중교통 길찾기
+                                    //최초 출발역
+                                    var firstStartStation = p0!!.json.getJSONObject("Info").getString("firstStartStation")
+                                    Log.i("최초 출발역: ", firstStartStation)
+                                }
+                            }catch (e: JSONException){
+                                    e.printStackTrace()
+                            }
+                        }
+
+                        override fun onError(p0: Int, p1: String?, p2: API?) {
+                            if(p2== API.SEARCH_BUS_LANE){}
+                        }
+                    }
+                    //경도 : long 위도: lati
+                    oDsayService.requestSearchPubTransPath(tMapView.longitude.toString(), tMapView.latitude.toString()
+                        ,des_longitude.toString(), des_latitude.toString(),"0","0","0",callbackListener)
                 }
             }
         }
