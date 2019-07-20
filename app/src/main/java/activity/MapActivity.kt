@@ -3,7 +3,6 @@ package activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
 import android.location.LocationManager
@@ -15,12 +14,13 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
 import com.skt.Tmap.*
-import resources.APIKey
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
+import resources.APIKey
 import java.util.*
 
 class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
@@ -31,9 +31,11 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     private lateinit var callBtn: Button
     private lateinit var footCountBtn: Button
+    private lateinit var locationText: TextView
     private lateinit var tMapView: TMapView
     private lateinit var tMapGpsManager: TMapGpsManager
     private lateinit var tMapPoint: TMapPoint
+    private lateinit var tMapData: TMapData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +66,11 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapView.setTrackingMode(true)
         tMapView.setSightVisible(true)
 
+        tMapData = TMapData()
+
         callBtn = findViewById(R.id.btn_call_center)
         footCountBtn = findViewById(R.id.btn_count_foot)
+        locationText = findViewById(R.id.txt_my_location)
 
         callBtn.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
@@ -95,20 +100,28 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     override fun onLocationChange(p0: Location?) {
 
         if (p0 != null) {
-            tMapView.setLocationPoint(p0.latitude, p0.longitude)
-            tMapView.setCenterPoint(p0.latitude, p0.longitude)
-            Log.i("뭔데","?????????????!!!!!!!!!!!!")
 
+            tMapView.setLocationPoint(p0.longitude, p0.latitude)
+            tMapView.setCenterPoint(p0.longitude, p0.latitude)
             tMapView.removeAllTMapCircle()
             tMapView.zoomLevel = 15
-            var circle = TMapCircle()
-            circle.radius = 50.0
-            circle.areaAlpha = 50
-            circle.areaColor = Color.argb(128,255,203,203)
-            circle.lineColor = Color.argb(128,255,203,203)
-            tMapPoint = tMapView.locationPoint
-            circle.centerPoint = tMapPoint
-            tMapView.addTMapCircle("circle_test", circle)
+            tMapPoint = TMapPoint(tMapView.longitude, tMapView.latitude)
+
+            tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
+                Log.i("it---->", it)
+                var location: String = it.substring(0,13)
+                Log.i("location", location)
+                //${txt_my_location.text}$short_address
+                locationText.text = "$location"
+            }
+
+//            var circle = TMapCircle()
+//            circle.radius = 50.0
+//            circle.areaAlpha = 50
+//            circle.areaColor = Color.argb(128,255,203,203)
+//            circle.lineColor = Color.argb(128,255,203,203)
+//            circle.centerPoint = tMapPoint
+//            tMapView.addTMapCircle("circle_test", circle)
         }
     }
 
@@ -119,14 +132,14 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         p3: PointF?
     ): Boolean {
         if (p2 != null) {
-            tMapView.removeTMapPolyLine("line_test")
-            var polyLine = TMapPolyLine()
-            polyLine.lineColor = Color.RED
-            polyLine.outLineColor = Color.RED
-            polyLine.lineWidth = 4F
-            polyLine.addLinePoint(tMapPoint)
-            polyLine.addLinePoint(TMapPoint(p2.latitude, p2.longitude))
-            tMapView.addTMapPolyLine("line_test", polyLine)
+//            tMapView.removeTMapPolyLine("line_test")
+//            var polyLine = TMapPolyLine()
+//            polyLine.lineColor = Color.RED
+//            polyLine.outLineColor = Color.RED
+//            polyLine.lineWidth = 4F
+//            polyLine.addLinePoint(tMapPoint)
+//            polyLine.addLinePoint(TMapPoint(p2.longitude, p2.latitude))
+//            tMapView.addTMapPolyLine("line_test", polyLine)
         }
 
         return true

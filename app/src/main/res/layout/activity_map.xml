@@ -24,9 +24,11 @@
 
         <Button
             android:id="@+id/btn_search_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="28dp"
+            android:layout_height="15dp"
             android:layout_below="@id/txt_my_location"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/icon2"
             android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
