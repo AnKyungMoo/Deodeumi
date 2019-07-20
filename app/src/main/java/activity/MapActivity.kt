@@ -24,10 +24,16 @@ import com.odsay.odsayandroidsdk.OnResultCallbackListener
 import com.skt.Tmap.*
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
+import models.CheckPointModel
 import org.json.JSONArray
 import org.json.JSONException
 import resources.APIKey
 import java.util.*
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
+
+
 
 class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallback, TMapView.OnClickListenerCallback{
 
@@ -52,6 +58,8 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private var busCount: Int = 0
     private var walkCount: Int = 0
 
+    private var checkPointList = arrayOf<CheckPointModel>()
+    private var currentIndex: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +80,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         tMapView.mapType = TMapView.MAPTYPE_STANDARD
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN)
-        tMapView.zoomLevel = 20
+//        tMapView.zoomLevel = 20
 
         tMapGpsManager = TMapGpsManager(this)
         tMapGpsManager.minTime = 1000
@@ -100,6 +108,12 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         }
 
+        /* TODO: 임시로 거리 확인중임 완료되면 tts 연결로 바꾸자 */
+        btn_play.setOnClickListener {
+            Toast.makeText(this, distance(tMapPoint.latitude, tMapPoint.longitude,
+                checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude).toString(), Toast.LENGTH_SHORT).show()
+        }
+
         btn_count_foot.setOnClickListener{
             val intent = Intent(this, StrideActivity::class.java)
             startActivityForResult(intent, 200)
@@ -124,14 +138,23 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
             tMapView.setCenterPoint(p0.longitude, p0.latitude)
-            tMapView.removeAllTMapCircle()
-            tMapView.zoomLevel = 20
-            tMapPoint = TMapPoint(tMapView.longitude, tMapView.latitude)
+//            tMapView.removeAllTMapCircle()
+//            tMapView.zoxomLevel = 20
+            tMapPoint = TMapPoint(p0.latitude, p0.longitude)
 
-            tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
+            tMapData.convertGpsToAddress(p0.latitude, p0.longitude) {
                 var location: String = it.substring(0,13)
                 Log.i("location", location)
                 locationText.text = "출발: ".plus(it)
+            }
+
+            if (checkPointList.isNotEmpty()) {
+                if (distance(p0.latitude, p0.longitude,
+                        checkPointList[currentIndex].latitude, checkPointList[currentIndex].longitude) <= 3) {
+                    checkPointList[currentIndex].isVisit = true
+                    currentIndex++
+                    Toast.makeText(this, "도착!", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -161,27 +184,48 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     @Override
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode){
+        when(requestCode) {
             GPS_ENABLE_REQUEST_CODE -> {
-                if(checkLocationServiceStatus()){
+                if (checkLocationServiceStatus()) {
                     checkRunTimePermission()
                     return
                 }
             }
 
             LOCATION_ACTIVITY_CODE -> {
-                if(resultCode == 0){
+                if (resultCode == 0) {
                     des_text = data!!.getStringExtra("myLocationString").toString()
                     des_longitude = data.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
+
                     desMapPoint = TMapPoint(des_latitude!!, des_longitude!!)
 
-                    tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) {
-                        it.lineColor = Color.BLUE
-                        it.passPoint.forEach{
-                            Log.d("CheckPointKM", it.latitude.toString() + " " + it.longitude)
+                    tMapData.findPathDataWithType(
+                        TMapData.TMapPathType.PEDESTRIAN_PATH,
+                        tMapView.locationPoint,
+                        desMapPoint
+                    ) { polyLine ->
+                        polyLine.lineColor = Color.BLUE
+
+                        var index = 0
+                        checkPointList = arrayOf()
+                        polyLine.linePoint.forEach { item ->
+                            val checkPointModel = CheckPointModel(false, item.latitude, item.longitude)
+                            checkPointList += checkPointModel
+
+                            val point = TMapPoint(item.latitude, item.longitude)
+                            val tMapCircle = TMapCircle()
+                            tMapCircle.centerPoint = point
+                            tMapCircle.radius = 1.0
+                            tMapCircle.circleWidth = 1f
+                            tMapCircle.lineColor = Color.RED
+                            tMapCircle.areaColor = Color.RED
+                            tMapCircle.areaAlpha = 100
+                            tMapView.addTMapCircle("circle$index", tMapCircle)
+                            index++
                         }
-                        tMapView.addTMapPath(it)
+
+                        tMapView.addTMapPath(polyLine)
                     }
 
                     var callbackListener = object: OnResultCallbackListener {
@@ -197,20 +241,20 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 //                                        if(jObject.getInt("pathType") == 3){
 
 
-                                            val jSubPath = jObject.getJSONArray("subPath")
-                                            for(j in 0..jSubPath.length()-1){
-                                                val subPath = jSubPath.getJSONObject(j)
-                                                if (subPath.getInt("trafficType") == 1) { //1:지하철 , 2:버스, 3:도보
-                                                    Log.i("subwayname: ", subPath.getString("startName"))
-                                                    subwayCount += 1
-                                                } else if(subPath.getInt("trafficType") ==2 ){
-                                                    busCount += 1
-                                                } else {
-                                                    Log.i("이동거리: ", subPath.getString("distance").toString())
-                                                    Log.i("소요시간: ", subPath.getString("sectionTime").toString())
-                                                    walkCount += 1
-                                                }
+                                        val jSubPath = jObject.getJSONArray("subPath")
+                                        for(j in 0..jSubPath.length()-1){
+                                            val subPath = jSubPath.getJSONObject(j)
+                                            if (subPath.getInt("trafficType") == 1) { //1:지하철 , 2:버스, 3:도보
+                                                Log.i("subwayname: ", subPath.getString("startName"))
+                                                subwayCount += 1
+                                            } else if(subPath.getInt("trafficType") ==2 ){
+                                                busCount += 1
+                                            } else {
+                                                Log.i("이동거리: ", subPath.getString("distance").toString())
+                                                Log.i("소요시간: ", subPath.getString("sectionTime").toString())
+                                                walkCount += 1
                                             }
+                                        }
 //                                        }
 //                                        val jInfo = jObject.getJSONObject("info")
 //                                        val jSubPath = jObject.getJSONArray("subPath")
@@ -231,7 +275,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                                     }
                                 }
                             }catch (e: JSONException){
-                                    e.printStackTrace()
+                                e.printStackTrace()
                             }
 
                             Log.i("subway: ", subwayCount.toString())
@@ -243,13 +287,33 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                             if(p2== API.SEARCH_PUB_TRANS_PATH){}
                         }
                     }
-                    //경도 : long 위도: lati
-                    oDsayService.requestSearchPubTransPath(tMapView.longitude.toString(), tMapView.latitude.toString()
-                        ,des_longitude.toString(), des_latitude.toString(),"0","0","0",callbackListener)
                 }
             }
         }
+    }
 
+    private fun distance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Int {
+
+        var theta = lon1 - lon2
+        var dist = sin(deg2rad(lat1)) * sin(deg2rad(lat2)) + cos(deg2rad(lat1)) * cos(deg2rad(lat2)) * cos(deg2rad(theta))
+
+        dist = acos(dist)
+        dist = rad2deg(dist)
+        dist = dist * 60 * 1.1515
+
+        dist *= 1609.344
+        return dist.toInt()
+    }
+
+
+    // This function converts decimal degrees to radians
+    private fun deg2rad(deg: Double): Double {
+        return (deg * Math.PI / 180.0)
+    }
+
+    // This function converts radians to decimal degrees
+    private fun rad2deg(rad: Double): Double {
+        return (rad * 180 / Math.PI)
     }
 
     private fun checkLocationServiceStatus():Boolean {
