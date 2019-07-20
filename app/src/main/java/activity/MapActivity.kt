@@ -170,6 +170,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                     des_text = data!!.getStringExtra("myLocationString").toString()
                     des_longitude = data.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
+
+                    desMapPoint = TMapPoint(des_latitude!!, des_longitude!!)
+
                     tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) {
                         it.lineColor = Color.BLUE
                         it.passPoint.forEach{
