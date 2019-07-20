@@ -20,8 +20,8 @@ import service.KakaoRestService
 
 class LocationSearchActivity : AppCompatActivity() {
     private lateinit var subscription: Disposable
-
     private lateinit var searchAdapter: SearchAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_search)

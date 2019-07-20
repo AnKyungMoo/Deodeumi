@@ -18,9 +18,10 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:text="출발: (내위치)"
+            android:text="출발: "
             android:textColor="#000000"
             android:textSize="18sp" />
+
 
         <Button
             android:id="@+id/btn_search_location"

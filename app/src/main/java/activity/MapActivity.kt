@@ -3,6 +3,7 @@ package activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.PointF
 import android.location.Location
 import android.location.LocationManager
@@ -13,7 +14,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
@@ -27,15 +27,21 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     private val GPS_ENABLE_REQUEST_CODE: Int = 200
     private val PERMISSIONS_REQUEST_CODE: Int = 100
+    private val LOCATION_ACTIVITY_CODE: Int = 300
     private var REQUIRED_PERMISSIONS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    private lateinit var callBtn: Button
-    private lateinit var footCountBtn: Button
     private lateinit var locationText: TextView
     private lateinit var tMapView: TMapView
     private lateinit var tMapGpsManager: TMapGpsManager
     private lateinit var tMapPoint: TMapPoint
+    private lateinit var desMapPoint: TMapPoint
     private lateinit var tMapData: TMapData
+
+    private var des_text: String? = null
+    private var des_longitude: Double? = null
+    private var des_latitude: Double? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +62,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         tMapView.mapType = TMapView.MAPTYPE_STANDARD
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN)
+        tMapView.zoomLevel = 20
 
         tMapGpsManager = TMapGpsManager(this)
         tMapGpsManager.minTime = 1000
@@ -68,11 +75,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         tMapData = TMapData()
 
-        callBtn = findViewById(R.id.btn_call_center)
-        footCountBtn = findViewById(R.id.btn_count_foot)
         locationText = findViewById(R.id.txt_my_location)
 
-        callBtn.setOnClickListener {
+        btn_call_center.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
             val builder = AlertDialog.Builder(this)
                 .setView(dialogView)
@@ -85,14 +90,14 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         }
 
-        footCountBtn.setOnClickListener{
+        btn_count_foot.setOnClickListener{
             val intent = Intent(this, StrideActivity::class.java)
             startActivityForResult(intent, 200)
         }
 
         btn_search_location.setOnClickListener {
             val intent = Intent(this, LocationSearchActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, LOCATION_ACTIVITY_CODE)
         }
 
     }
@@ -104,24 +109,14 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
             tMapView.setCenterPoint(p0.longitude, p0.latitude)
             tMapView.removeAllTMapCircle()
-            tMapView.zoomLevel = 15
+            tMapView.zoomLevel = 20
             tMapPoint = TMapPoint(tMapView.longitude, tMapView.latitude)
 
             tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
-                Log.i("it---->", it)
                 var location: String = it.substring(0,13)
                 Log.i("location", location)
-                //${txt_my_location.text}$short_address
-                locationText.text = "$location"
+                locationText.text = "출발: ".plus(it)
             }
-
-//            var circle = TMapCircle()
-//            circle.radius = 50.0
-//            circle.areaAlpha = 50
-//            circle.areaColor = Color.argb(128,255,203,203)
-//            circle.lineColor = Color.argb(128,255,203,203)
-//            circle.centerPoint = tMapPoint
-//            tMapView.addTMapCircle("circle_test", circle)
         }
     }
 
@@ -132,14 +127,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         p3: PointF?
     ): Boolean {
         if (p2 != null) {
-//            tMapView.removeTMapPolyLine("line_test")
-//            var polyLine = TMapPolyLine()
-//            polyLine.lineColor = Color.RED
-//            polyLine.outLineColor = Color.RED
-//            polyLine.lineWidth = 4F
-//            polyLine.addLinePoint(tMapPoint)
-//            polyLine.addLinePoint(TMapPoint(p2.longitude, p2.latitude))
-//            tMapView.addTMapPolyLine("line_test", polyLine)
+
         }
 
         return true
@@ -165,6 +153,22 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                 }
             }
 
+            LOCATION_ACTIVITY_CODE -> {
+                if(resultCode == 0){
+                    des_text = data!!.getStringExtra("myLocationString").toString()
+                    des_longitude = data.getStringExtra("longitude").toDouble()
+                    des_latitude = data.getStringExtra("latitude").toDouble()
+
+                    tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) {
+                        it.lineColor = Color.BLUE
+
+                        it.passPoint.forEach{
+                            Log.d("CheckPointKM", it.latitude.toString() + " " + it.longitude)
+                        }
+                        tMapView.addTMapPath(it)
+                    }
+                }
+            }
         }
 
     }

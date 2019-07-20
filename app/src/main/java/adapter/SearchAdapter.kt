@@ -1,6 +1,5 @@
 package adapter
 
-import activity.MapActivity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -49,12 +48,11 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.H
 
         // item click 할 때 발생하는 이벤트
         holder.itemView.setOnClickListener {
-            val intent = Intent(context, MapActivity::class.java)
+            val intent = Intent()
             intent.putExtra("myLocationString", documentList[position].place_name)
             intent.putExtra("longitude", documentList[position].x)
             intent.putExtra("latitude",documentList[position].y)
-            context.startActivity(intent)
-
+            (context as Activity).setResult(0, intent)
             (context as Activity).finish()
         }
     }
