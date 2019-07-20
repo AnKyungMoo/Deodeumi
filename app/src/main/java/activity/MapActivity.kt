@@ -17,10 +17,15 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
+import com.odsay.odsayandroidsdk.API
+import com.odsay.odsayandroidsdk.ODsayData
+import com.odsay.odsayandroidsdk.ODsayService
+import com.odsay.odsayandroidsdk.OnResultCallbackListener
 import com.skt.Tmap.*
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.custom_dialog.view.*
 import models.CheckPointModel
+import org.json.JSONException
 import resources.APIKey
 import java.util.*
 import kotlin.math.acos
@@ -43,6 +48,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private lateinit var tMapPoint: TMapPoint
     private lateinit var desMapPoint: TMapPoint
     private lateinit var tMapData: TMapData
+    private lateinit var oDsayService: ODsayService
 
     private var des_text: String? = null
     private var des_longitude: Double? = null
@@ -60,7 +66,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapView.setSKTMapApiKey(APIKey.TMAP)
         tMapView.setCompassMode(true)
         tMapView.setIconVisibility(true)
-
+        settingOdsay()
 
 //        if(!checkLocationServiceStatus()){
 //            showDialogForLocationServiceSetting()
@@ -116,6 +122,12 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
     }
 
+    fun settingOdsay(){
+        oDsayService = ODsayService.init(this, APIKey.ODsay)
+        oDsayService.setConnectionTimeout(5000)
+        oDsayService.setConnectionTimeout(5000)
+    }
+
     override fun onLocationChange(p0: Location?) {
 
         if (p0 != null) {
@@ -168,23 +180,27 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     @Override
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode){
+        when(requestCode) {
             GPS_ENABLE_REQUEST_CODE -> {
-                if(checkLocationServiceStatus()){
+                if (checkLocationServiceStatus()) {
                     checkRunTimePermission()
                     return
                 }
             }
 
             LOCATION_ACTIVITY_CODE -> {
-                if(resultCode == 0){
+                if (resultCode == 0) {
                     des_text = data!!.getStringExtra("myLocationString").toString()
                     des_longitude = data.getStringExtra("longitude").toDouble()
                     des_latitude = data.getStringExtra("latitude").toDouble()
 
                     desMapPoint = TMapPoint(des_latitude!!, des_longitude!!)
 
-                    tMapData.findPathDataWithType(TMapData.TMapPathType.PEDESTRIAN_PATH,tMapView.locationPoint, desMapPoint) { polyLine ->
+                    tMapData.findPathDataWithType(
+                        TMapData.TMapPathType.PEDESTRIAN_PATH,
+                        tMapView.locationPoint,
+                        desMapPoint
+                    ) { polyLine ->
                         polyLine.lineColor = Color.BLUE
 
                         var index = 0
@@ -221,9 +237,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         dist = rad2deg(dist)
         dist = dist * 60 * 1.1515
 
-
         dist *= 1609.344
-
         return dist.toInt()
     }
 
