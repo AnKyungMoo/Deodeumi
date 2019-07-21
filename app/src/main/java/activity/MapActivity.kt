@@ -105,7 +105,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         }
 
 
-
         btn_call_center.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
             val builder = AlertDialog.Builder(this)
@@ -127,10 +126,10 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
                 tts_status = !tts_status
                 if (tts_status) { //재생 버튼 눌렸을 때 (true)
-                    btn_play.setBackgroundResource(R.drawable.btn_stop)
+                    btn_play.setBackgroundResource(R.drawable.blue_btn_stop)
                     tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
                 } else {
-                    btn_play.setBackgroundResource(R.drawable.btn_play)
+                    btn_play.setBackgroundResource(R.drawable.blue_btn_play)
                     tts.stop()
                 }
             }
@@ -158,7 +157,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
                 when (intent?.action) {
                     TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED -> {
                         tts_status = false
-                        btn_play.setBackgroundResource(R.drawable.btn_play)
+                        btn_play.setBackgroundResource(R.drawable.blue_btn_play)
                     }
                 }
             }
