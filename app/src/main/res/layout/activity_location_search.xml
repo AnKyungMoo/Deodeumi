@@ -18,6 +18,7 @@
 				android:text="출발: (내위치)"
 				android:textSize="18sp"
 				android:textColor="#000000"
+				android:fontFamily="@font/notosanscjkkr_bold"
 				android:layout_centerHorizontal="true"
 				android:layout_margin="15dp"/>
 		
@@ -37,6 +38,7 @@
 				android:text="도착"
 				android:textColor="#939393"
 				android:textSize="15sp"
+				android:fontFamily="@font/notosanscjkkr_bold"
 				android:layout_centerVertical="true"
 				android:layout_marginStart="15dp"/>
 
@@ -49,6 +51,7 @@
 				android:background="@null"
 				android:hint="도착지를 입력하세요"
 				android:textColor="#000000"
+				android:fontFamily="@font/notosanscjkkr_bold"
 				android:layout_toRightOf="@+id/txt_search_destination"/>
 
 			<Button

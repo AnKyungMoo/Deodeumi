@@ -22,7 +22,7 @@
             android:layout_marginTop="15dp"
             android:text="출발: "
             android:textColor="#0440e3"
-            android:textStyle="bold"
+            android:fontFamily="@font/notosanscjkkr_bold"
             android:textSize="30sp" />
 
 

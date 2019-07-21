@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="강남역"
+        android:fontFamily="@font/notosanscjkkr_bold"
         android:textSize="18sp"
         android:textColor="#000000"/>
     
@@ -21,6 +22,7 @@
         android:layout_below="@+id/text_search_name"
         android:textColor="#939393"
         android:textSize="15sp"
+        android:fontFamily="@font/notosanscjkkr_bold"
         android:text="서울 관악구 관악로 249 - 1 (성형동)"
         android:paddingTop="5dp"/>
 
