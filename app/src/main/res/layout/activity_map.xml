@@ -9,7 +9,7 @@
     <RelativeLayout
         android:id="@+id/layout_search"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="100dp"
         android:background="@drawable/layout_border">
 
         <TextView
@@ -19,8 +19,9 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
             android:text="출발: "
-            android:textColor="#000000"
-            android:textSize="18sp" />
+            android:textColor="#0440e3"
+            android:textStyle="bold"
+            android:textSize="30sp" />
 
 
         <Button
@@ -55,17 +56,19 @@
     <RelativeLayout
         android:id="@+id/layout_menu_bar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="80dp"
         android:layout_alignParentBottom="true"
-        android:background="#0b78ad">
+        android:background="#ffffff">
 
         <Button
             android:id="@+id/btn_play"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerInParent="true"
             android:contentDescription="경로 음성 안내"
-            android:background="@drawable/btn_play" />
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/blue_btn_play" />
 
         <Button
             android:id="@+id/btn_count_foot"
@@ -73,9 +76,8 @@
             android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:contentDescription="보폭 조절"
-            android:layout_marginRight="10dp"
-            android:layout_toStartOf="@+id/btn_call_center"
-            android:background="@drawable/btn_foot" />
+            android:layout_centerInParent="true"
+            android:background="@drawable/blue_btn_person" />
 
         <Button
             android:id="@+id/btn_call_center"
@@ -84,7 +86,8 @@
             android:contentDescription="전화 지원"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/btn_phone" />
+            android:layout_marginRight="10dp"
+            android:background="@drawable/blue_btn_call" />
 
     </RelativeLayout>
 </RelativeLayout>

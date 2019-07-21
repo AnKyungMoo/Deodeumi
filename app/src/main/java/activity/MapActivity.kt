@@ -18,7 +18,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
 import com.km.deodeumi.R
 import com.odsay.odsayandroidsdk.API
@@ -102,7 +101,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         Log.d("testttt", tMapView.latitude.toString() + " " + tMapView.longitude)
         tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
             Log.d("afterCall", it)
-            txt_my_location2.text = "출발: $it"
+            txt_my_location2.text = it
         }
 
 
@@ -144,7 +143,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         btn_search_location.setOnClickListener {
             val intent = Intent(this, LocationSearchActivity::class.java)
-            var address = txt_my_location2.text.substring(3, txt_my_location2.length())
+            var address = txt_my_location2.text.toString()//.substring(3, txt_my_location2.length())
             Log.i("address", address)
             intent.putExtra("myaddress", address)
             startActivityForResult(intent, LOCATION_ACTIVITY_CODE)
@@ -227,8 +226,7 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
             tMapData.convertGpsToAddress(p0.latitude, p0.longitude) {
                 Log.i("주소: ", it)
-                findViewById<TextView>(R.id.txt_my_location2).text = it // "출발:  $it"
-                //txt_my_location2.text = "출발222222: $it"
+                txt_my_location2.text = it // "출발:  $it"
             }
 
             if (checkPointList.isNotEmpty()) {
