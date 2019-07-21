@@ -1,5 +1,6 @@
 package activity
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -46,7 +47,6 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
     private val LOCATION_ACTIVITY_CODE: Int = 300
     private var REQUIRED_PERMISSIONS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    private lateinit var locationText: TextView
     private lateinit var tMapView: TMapView
     private lateinit var tMapGpsManager: TMapGpsManager
     private lateinit var tMapPoint: TMapPoint
@@ -99,8 +99,13 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         tMapView.setSightVisible(true)
 
         tMapData = TMapData()
+        Log.d("testttt", tMapView.latitude.toString() + " " + tMapView.longitude)
+        tMapData.convertGpsToAddress(tMapView.latitude, tMapView.longitude) {
+            Log.d("afterCall", it)
+            txt_my_location2.text = "출발: $it"
+        }
 
-        locationText = findViewById(R.id.txt_my_location)
+
 
         btn_call_center.setOnClickListener {
             val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
@@ -139,6 +144,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
 
         btn_search_location.setOnClickListener {
             val intent = Intent(this, LocationSearchActivity::class.java)
+            var address = txt_my_location2.text.substring(3, txt_my_location2.length())
+            Log.i("address", address)
+            intent.putExtra("myaddress", address)
             startActivityForResult(intent, LOCATION_ACTIVITY_CODE)
         }
 
@@ -203,8 +211,10 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
         oDsayService.setConnectionTimeout(5000)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onLocationChange(p0: Location?) {
 
+         Log.i("p0",p0.toString())
         if (p0 != null) {
 
             tMapView.setLocationPoint(p0.longitude, p0.latitude)
@@ -216,9 +226,9 @@ class MapActivity : AppCompatActivity(), TMapGpsManager.onLocationChangedCallbac
             tMapPoint = TMapPoint(p0.latitude, p0.longitude)
 
             tMapData.convertGpsToAddress(p0.latitude, p0.longitude) {
-                var location: String = it.substring(0, 13)
-                Log.i("location", location)
-                locationText.text = "출발: ".plus(it)
+                Log.i("주소: ", it)
+                findViewById<TextView>(R.id.txt_my_location2).text = it // "출발:  $it"
+                //txt_my_location2.text = "출발222222: $it"
             }
 
             if (checkPointList.isNotEmpty()) {

@@ -36,6 +36,10 @@ class LocationSearchActivity : AppCompatActivity() {
         dividerItemDecoration.setDrawable(baseContext.getDrawable(R.drawable.recyclerview_divider))
         search_recycler_view.addItemDecoration(dividerItemDecoration)
 
+        var intent = intent
+        var address = intent.getStringExtra("myaddress")
+        txt_my_location.text = "출발: $address"
+
         edit_search_destination.addTextChangedListener(object: TextWatcher{
             override fun afterTextChanged(s: Editable?) {
                 Log.d("", "")
@@ -49,6 +53,10 @@ class LocationSearchActivity : AppCompatActivity() {
                 getKeywordSearch(edit_search_destination.text.toString())
             }
         })
+
+        btn_close.setOnClickListener {
+            edit_search_destination.text=Editable.Factory.getInstance().newEditable("")
+        }
     }
 
     private fun getAddressSearch(keyword: String) {
